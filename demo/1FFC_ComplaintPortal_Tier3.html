@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>1FFC Complaint Management Portal — v3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+:root{
+  --navy:#0F2044;--navy-l:#1e3a6e;--navy-dim:rgba(15,32,68,.07);
+  --blue-tint:#E8F0FE;--blue-mid:#BFDBFE;
+  --amber:#F59E0B;--amber-bg:#FEF3C7;--amber-dk:#92400E;
+  --emerald:#10B981;--emerald-bg:#D1FAE5;--emerald-dk:#065F46;
+  --red:#EF4444;--red-bg:#FEE2E2;--red-dk:#991B1B;
+  --purple:#8B5CF6;--purple-bg:#EDE9FE;--purple-dk:#5B21B6;
+  --sky:#3B82F6;--sky-bg:#DBEAFE;
+  --g50:#F9FAFB;--g100:#F3F4F6;--g200:#E5E7EB;--g300:#D1D5DB;
+  --g400:#9CA3AF;--g500:#6B7280;--g600:#4B5563;--g700:#374151;--g900:#111827;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--g50);color:var(--g900);font-size:14px}
+.app{display:flex;height:100vh;overflow:hidden}
+/* SIDEBAR */
+.sb{width:232px;background:var(--navy);display:flex;flex-direction:column;flex-shrink:0}
+.sb-logo{padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,.1)}
+.logo-row{display:flex;align-items:center;gap:8px}
+.logo-badge{background:var(--amber);color:var(--g900);font-size:11px;font-weight:800;padding:3px 7px;border-radius:5px}
+.logo-name{font-size:14px;font-weight:800;color:white;letter-spacing:.04em}
+.logo-sub{font-size:10px;color:rgba(255,255,255,.4);margin-top:4px;letter-spacing:.04em;text-transform:uppercase}
+.sb-nav{flex:1;padding:10px 8px;overflow-y:auto}
+.nav-sec{font-size:9.5px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:.1em;text-transform:uppercase;padding:10px 10px 4px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:7px;cursor:pointer;font-size:12.5px;font-weight:500;color:rgba(255,255,255,.6);border:none;background:none;width:100%;text-align:left;transition:all .15s}
+.nav-item:hover{background:rgba(255,255,255,.08);color:white}
+.nav-item.active{background:rgba(255,255,255,.14);color:white;font-weight:600}
+.nav-item.locked{opacity:.3;cursor:not-allowed;pointer-events:none}
+.nav-icon{font-size:14px;flex-shrink:0;width:18px;text-align:center}
+.nav-badge{margin-left:auto;padding:2px 6px;border-radius:10px;font-size:10px;font-weight:700}
+.nb-red{background:var(--red);color:white}
+.nb-amber{background:var(--amber);color:var(--g900)}
+.nb-gray{background:rgba(255,255,255,.15);color:rgba(255,255,255,.8)}
+.sb-foot{padding:12px;border-top:1px solid rgba(255,255,255,.08)}
+.user-pill{display:flex;align-items:center;gap:9px}
+.avatar{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.15);color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.u-name{font-size:12px;font-weight:600;color:white}
+.u-role{font-size:10px;color:rgba(255,255,255,.45);margin-top:1px}
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.topbar{height:52px;background:white;border-bottom:1px solid var(--g200);display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0;z-index:10}
+.topbar-title{font-size:15px;font-weight:700;color:var(--g900);flex:1}
+.topbar-actions{display:flex;align-items:center;gap:8px}
+.content{flex:1;overflow-y:auto;padding:20px 24px}
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;border:none;transition:all .15s;font-family:'Inter',sans-serif;white-space:nowrap}
+.btn-navy{background:var(--navy);color:white}.btn-navy:hover{background:var(--navy-l)}
+.btn-sec{background:var(--g100);color:var(--g700);border:1px solid var(--g200)}.btn-sec:hover{background:var(--g200)}
+.btn-green{background:var(--emerald);color:white}.btn-green:hover{background:#059669}
+.btn-amber{background:var(--amber);color:white}
+.btn-red{background:var(--red);color:white}
+.btn-ghost{background:none;border:1.5px solid var(--g200);color:var(--g600)}.btn-ghost:hover{border-color:var(--navy);color:var(--navy)}
+.btn-sm{padding:5px 11px;font-size:11.5px}
+.btn-xs{padding:3px 8px;font-size:11px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+/* CARDS */
+.card{background:white;border-radius:10px;border:1px solid var(--g200)}
+.cp{padding:18px 20px}
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.kpi{background:white;border:1px solid var(--g200);border-radius:10px;padding:16px 18px}
+.kpi.al{border-left:4px solid var(--amber)}
+.kpi.nl{border-left:4px solid var(--navy)}
+.kpi.rl{border-left:4px solid var(--red)}
+.kpi.el{border-left:4px solid var(--emerald)}
+.kpi-label{font-size:10.5px;font-weight:600;color:var(--g500);text-transform:uppercase;letter-spacing:.05em}
+.kpi-val{font-size:26px;font-weight:800;color:var(--g900);margin:4px 0 2px;line-height:1}
+.kpi-sub{font-size:11px;color:var(--g500)}
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
+.bo{background:var(--sky-bg);color:#1D4ED8}
+.br{background:var(--amber-bg);color:var(--amber-dk)}
+.bres{background:var(--emerald-bg);color:var(--emerald-dk)}
+.bcl{background:var(--g100);color:var(--g600)}
+.besc{background:var(--red-bg);color:var(--red-dk)}
+.bcrit{background:var(--red-bg);color:var(--red-dk)}
+.bhi{background:var(--amber-bg);color:var(--amber-dk)}
+.bmed{background:var(--sky-bg);color:#1D4ED8}
+.blo{background:var(--g100);color:var(--g600)}
+.bRESPA{background:var(--purple-bg);color:var(--purple-dk)}
+.bFCRA{background:#FCE7F3;color:#9D174D}
+.bUDAAP{background:var(--amber-bg);color:var(--amber-dk)}
+.bECOA{background:var(--emerald-bg);color:var(--emerald-dk)}
+.bFDCPA{background:var(--sky-bg);color:#1D4ED8}
+.bnone{background:var(--g100);color:var(--g500)}
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{text-align:left;font-size:10.5px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.05em;padding:9px 14px;border-bottom:1px solid var(--g200);background:var(--g50);white-space:nowrap}
+.tbl td{padding:11px 14px;border-bottom:1px solid var(--g100);font-size:12.5px;color:var(--g700);vertical-align:middle}
+.tbl tr:hover td{background:var(--blue-tint);cursor:pointer}
+.tbl tr.nh:hover td{background:none;cursor:default}
+.case-id{font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:500;color:var(--navy)}
+.mono{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--g500)}
+/* SLA */
+.sla{display:inline-flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:500}
+.sla-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.sla-ok{color:var(--emerald)}.sla-ok .sla-dot{background:var(--emerald)}
+.sla-warn{color:var(--amber)}.sla-warn .sla-dot{background:var(--amber);animation:pulse 1s infinite}
+.sla-breach{color:var(--red)}.sla-breach .sla-dot{background:var(--red);animation:pulse .7s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.4)}}
+/* DRAWER */
+.drawer-ov{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;display:flex;justify-content:flex-end}
+.drawer{width:500px;background:white;height:100%;overflow-y:auto;box-shadow:-6px 0 32px rgba(0,0,0,.18);display:flex;flex-direction:column}
+.dw-hdr{padding:18px 20px;display:flex;align-items:flex-start;gap:12px;background:var(--navy);flex-shrink:0}
+.dw-info{flex:1;min-width:0}
+.dw-id{font-family:'JetBrains Mono',monospace;font-size:12px;color:rgba(255,255,255,.6);margin-bottom:3px}
+.dw-name{font-size:16px;font-weight:700;color:white;margin-bottom:2px}
+.dw-sub{font-size:12px;color:rgba(255,255,255,.55)}
+.dw-close{background:rgba(255,255,255,.12);border:none;color:white;border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.dw-body{padding:18px 20px;flex:1}
+.dw-sec{margin-bottom:18px}
+.dw-sec-title{font-size:11px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.di label{font-size:10.5px;font-weight:600;color:var(--g500);display:block;margin-bottom:2px}
+.di span{font-size:13px;color:var(--g900)}
+.narr{background:var(--g50);border:1px solid var(--g200);border-radius:8px;padding:12px;font-size:12.5px;color:var(--g700);line-height:1.6}
+/* TIMELINE */
+.tl{position:relative;padding-left:22px}
+.tl::before{content:'';position:absolute;left:5px;top:8px;bottom:8px;width:2px;background:var(--g200)}
+.tl-item{position:relative;margin-bottom:16px}
+.tl-dot{position:absolute;left:-19px;top:3px;width:10px;height:10px;border-radius:50%;background:white;border:2px solid var(--g300)}
+.tl-dot.create{border-color:var(--navy);background:var(--navy)}
+.tl-dot.classify{border-color:var(--purple);background:var(--purple)}
+.tl-dot.status{border-color:var(--amber);background:var(--amber)}
+.tl-dot.assign{border-color:var(--emerald);background:var(--emerald)}
+.tl-dot.note{border-color:var(--g400);background:var(--g400)}
+.tl-dot.rule{border-color:var(--sky);background:var(--sky)}
+.tl-ts{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--g400);margin-bottom:2px}
+.tl-action{font-size:12.5px;color:var(--g700);line-height:1.4}
+.tl-actor{font-size:11px;font-weight:600;color:var(--g500);margin-top:2px}
+/* FORM */
+.fg{display:flex;flex-direction:column;gap:5px}
+.fg label{font-size:11.5px;font-weight:600;color:var(--g600)}
+.fg.full{grid-column:1/-1}
+input,select,textarea{padding:9px 11px;border:1.5px solid var(--g200);border-radius:7px;font-size:13px;font-family:'Inter',sans-serif;color:var(--g900);background:white;transition:border-color .15s;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--navy);box-shadow:0 0 0 3px var(--navy-dim)}
+textarea{resize:vertical;min-height:90px;line-height:1.5}
+.ferr{font-size:11px;color:var(--red);margin-top:2px}
+/* MODAL */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal{background:white;border-radius:14px;padding:24px;width:580px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.22)}
+.modal-title{font-size:17px;font-weight:800;color:var(--g900);margin-bottom:4px}
+.modal-sub{font-size:12.5px;color:var(--g500);margin-bottom:20px}
+.role-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.role-card{border:2px solid var(--g200);border-radius:10px;padding:14px;cursor:pointer;transition:all .15s;text-align:left;background:white}
+.role-card:hover{border-color:var(--navy);background:var(--blue-tint)}
+.role-card.sel{border-color:var(--navy);background:var(--blue-tint)}
+.rc-icon{font-size:22px;margin-bottom:8px}
+.rc-title{font-size:12.5px;font-weight:700;color:var(--g900);margin-bottom:3px}
+.rc-desc{font-size:11px;color:var(--g500);margin-bottom:10px;line-height:1.4}
+.perm{display:flex;align-items:center;gap:5px;font-size:10.5px;margin-bottom:3px}
+/* TOAST */
+.toast{position:fixed;bottom:22px;right:22px;background:var(--navy);color:white;padding:11px 16px;border-radius:9px;font-size:12.5px;font-weight:500;z-index:999;box-shadow:0 6px 24px rgba(0,0,0,.2);animation:slideUp .2s ease;max-width:400px}
+@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+/* ROLE PILL */
+.role-pill{display:flex;align-items:center;gap:6px;padding:4px 11px;border-radius:20px;font-size:11.5px;font-weight:700;cursor:pointer;border:1.5px solid;transition:all .15s}
+.role-pill:hover{opacity:.85}
+/* TOGGLE */
+.toggle{width:36px;height:20px;border-radius:10px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
+.toggle-thumb{width:16px;height:16px;border-radius:50%;background:white;position:absolute;top:2px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+/* WORKFLOW BUILDER */
+.wf-shell{display:grid;grid-template-columns:380px 1fr;gap:16px;margin-bottom:16px;align-items:start}
+.rule-card{background:white;border:1.5px solid var(--g200);border-radius:9px;padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:all .15s;display:flex;gap:10px;align-items:flex-start}
+.rule-card:hover{border-color:var(--navy);box-shadow:0 2px 8px rgba(15,32,68,.08)}
+.rule-card.active{border-color:var(--navy);background:var(--blue-tint);box-shadow:0 2px 8px rgba(15,32,68,.12)}
+.rule-card.drag-over{border-color:var(--amber);border-style:dashed}
+.rule-card.dragging{opacity:.4}
+.drag-handle{color:var(--g300);font-size:16px;cursor:grab;flex-shrink:0;padding-top:2px;user-select:none}
+.drag-handle:active{cursor:grabbing}
+.rule-priority{width:22px;height:22px;border-radius:50%;background:var(--navy);color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rule-body{flex:1;min-width:0}
+.rule-name{font-size:13px;font-weight:700;color:var(--g900);margin-bottom:3px}
+.rule-cond-summary{font-size:11.5px;color:var(--g600);margin-bottom:6px;line-height:1.4}
+.rule-action-chips{display:flex;gap:4px;flex-wrap:wrap}
+.action-chip{font-size:10px;font-weight:600;padding:2px 7px;border-radius:5px;background:var(--blue-tint);color:var(--navy)}
+.rule-controls{display:flex;align-items:center;gap:8px;flex-shrink:0}
+/* RULE EDITOR */
+.editor-panel{background:white;border-radius:10px;border:1.5px solid var(--g200);overflow:hidden}
+.editor-hdr{padding:16px 20px;border-bottom:1px solid var(--g200);background:var(--navy);display:flex;align-items:center;gap:10px}
+.editor-body{padding:20px}
+.cond-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.cond-row select{padding:7px 9px;font-size:12px;flex:1;min-width:100px}
+.cond-row .operator{min-width:90px;flex:0 0 auto}
+.cond-row input{padding:7px 9px;font-size:12px;flex:1;min-width:100px}
+.remove-btn{background:none;border:none;color:var(--g400);cursor:pointer;font-size:16px;flex-shrink:0;padding:2px 4px;border-radius:4px}
+.remove-btn:hover{color:var(--red);background:var(--red-bg)}
+.action-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.action-row select{padding:7px 9px;font-size:12px;flex:1;min-width:120px}
+.action-row input{padding:7px 9px;font-size:12px;flex:1;min-width:120px}
+.logic-toggle{display:flex;gap:4px}
+.lt-btn{padding:4px 12px;border-radius:6px;font-size:11px;font-weight:700;border:1.5px solid var(--g200);background:white;cursor:pointer;color:var(--g600);transition:all .15s}
+.lt-btn.active{background:var(--navy);color:white;border-color:var(--navy)}
+/* TESTER */
+.tester{background:white;border:1.5px solid var(--g200);border-radius:10px;padding:20px}
+.test-result-row{display:grid;grid-template-columns:180px 60px 1fr 1fr;gap:12px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--g100);font-size:12.5px}
+.test-result-row:last-child{border:none}
+.test-result-hdr{background:var(--g50);font-size:10.5px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.04em;padding:8px 14px;display:grid;grid-template-columns:180px 60px 1fr 1fr;gap:12px;border-bottom:1px solid var(--g200);border-radius:8px 8px 0 0}
+/* ANALYTICS */
+.an-grid2{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px}
+.an-grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px}
+.chart-title{font-size:13px;font-weight:700;color:var(--g900);margin-bottom:14px}
+.v-bars{display:flex;align-items:flex-end;gap:6px;height:110px;padding:0 2px}
+.v-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.v-val{font-size:10px;font-weight:700;color:var(--g600)}
+.v-fill{width:100%;border-radius:3px 3px 0 0;min-height:4px}
+.v-lbl{font-size:10px;color:var(--g500);text-align:center;line-height:1.2}
+.h-bars{display:flex;flex-direction:column;gap:7px}
+.h-row{display:flex;align-items:center;gap:8px}
+.h-lbl{width:120px;font-size:11.5px;color:var(--g600);text-align:right;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.h-track{flex:1;height:22px;background:var(--g100);border-radius:4px;overflow:hidden}
+.h-fill{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:8px;transition:width .6s ease}
+.h-fill span{font-size:11px;font-weight:700;color:white}
+.h-cnt{width:28px;font-size:11.5px;font-weight:600;color:var(--g700);text-align:right;flex-shrink:0}
+/* SPARKLINE */
+.spark{display:flex;align-items:flex-end;gap:3px;height:50px}
+.spark-bar{flex:1;border-radius:2px 2px 0 0;min-height:3px;transition:height .4s ease}
+/* HEATMAP */
+.heatmap-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.heatmap-tbl th{text-align:center;font-size:10px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.04em;padding:8px 10px;border-bottom:1px solid var(--g200);background:var(--g50)}
+.heatmap-tbl th:first-child{text-align:left}
+.heatmap-tbl td{padding:9px 10px;border-bottom:1px solid var(--g100);text-align:center;font-weight:600}
+.heatmap-tbl td:first-child{text-align:left;font-weight:600;color:var(--g900);font-size:12px}
+/* GAUGE */
+.gauge-wrap{display:flex;flex-direction:column;align-items:center}
+.gauge-ring{position:relative;width:90px;height:90px;margin-bottom:8px}
+.gauge-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.gauge-pct{font-size:20px;font-weight:800;color:var(--g900)}
+.gauge-lbl{font-size:10px;color:var(--g500)}
+/* MISC */
+.divider{height:1px;background:var(--g200);margin:14px 0}
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.sec-title{font-size:14.5px;font-weight:700;color:var(--g900)}
+.pill-tabs{display:flex;gap:4px;background:var(--g100);padding:3px;border-radius:8px}
+.ptab{padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:none;color:var(--g600);transition:all .15s;font-family:'Inter',sans-serif}
+.ptab.active{background:white;color:var(--g900);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.access-wall{display:flex;flex-direction:column;align-items:center;justify-content:center;height:60vh;gap:12px;color:var(--g500)}
+.aw-icon{font-size:48px}
+.aw-title{font-size:16px;font-weight:700;color:var(--g700)}
+.aw-desc{font-size:13px;max-width:320px;text-align:center;line-height:1.5}
+.info-bar{padding:11px 14px;background:var(--blue-tint);border-radius:9px;border:1px solid var(--blue-mid);font-size:12px;color:var(--navy);line-height:1.6;margin-top:14px}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--g300);border-radius:3px}
+</style>
+</head>
+<body>
+<div id="root" style="display:flex;height:100vh;align-items:center;justify-content:center;font-family:Inter,sans-serif;color:#6B7280;font-size:13px">Initializing…</div>
+<script type="text/babel">
+const {useState,useEffect,useCallback,useRef,useMemo}=React;
+
+// ── CONSTANTS ────────────────────────────────────────────────────────
+const CFPB_CATS={
+  'Mortgage':['Payment processing, late fee','Escrow account','Loan modification, collection, foreclosure','Applying for a mortgage or refinancing','Closing on a mortgage'],
+  'Checking or savings account':['Managing an account','Problem with a debit or ATM card','Deposits and withdrawals','Opening an account','Problem caused by your funds being low'],
+  'Credit card or prepaid card':['Problem with a purchase shown on your statement','Fees or interest','Billing, statements, or errors','Closing your account'],
+  'Auto loan or lease':['Managing the loan or lease','Getting a loan or lease','Problems at the end of the loan or lease'],
+  'Student loan':['Dealing with my lender or servicer','Getting a loan',"Can't repay my loan"],
+  'Debt collection':['Attempts to collect debt not owed','False statements or representation','Took or threatened to take negative or legal action','Cont: How you tried to collect'],
+  'Credit reporting':['Incorrect information on your report','Problem with a credit reporting company investigation','Improper use of your report'],
+  'Money transfer, virtual currency, or money service':['Money was not available when promised','Other transaction problem','Fraud or scam'],
+  'Payday loan, title loan, or personal loan':['Charged fees or interest you did not expect','Problem with the payoff process at the end of the loan'],
+};
+const BRANCHES=['Houston — Westheimer, TX','Atlanta — Buckhead, GA','Nashville — Downtown, TN','Chicago — Loop, IL','Detroit — Midtown, MI','Phoenix — Central, AZ','San Antonio — North Star, TX','Charlotte — Uptown, NC','Seattle — Bellevue, WA','Miami — Brickell, FL','Dallas — Uptown, TX','Memphis — Midtown, TN','Indianapolis — Meridian, IN','Columbus — Short North, OH'];
+const STATES=['TX','GA','TN','IL','MI','AZ','NC','WA','FL','IN','OH'];
+const AGENTS=['Sarah Chen','Marcus Webb','Diana Park','Patricia Vega','Carlos Rivera','Ellen Hart','Thomas Reed','James Okafor'];
+const ROLES_CFG={
+  agent:{label:'Branch Agent',color:'#3B82F6',icon:'👤',desc:'Manages complaints for assigned branch.',
+    perms:{'View own branch':true,'View all branches':false,'CFPB Export':false,'Audit Log':false,'Analytics':false,'Workflow Builder':false,'Reassign':false,'Delete':false}},
+  compliance:{label:'Compliance Officer',color:'#8B5CF6',icon:'⚖️',desc:'Full read, regulatory reporting, rule management.',
+    perms:{'View own branch':true,'View all branches':true,'CFPB Export':true,'Audit Log':true,'Analytics':true,'Workflow Builder':true,'Reassign':true,'Delete':false}},
+  admin:{label:'System Administrator',color:'#0F2044',icon:'🔑',desc:'Full access including delete and system config.',
+    perms:{'View own branch':true,'View all branches':true,'CFPB Export':true,'Audit Log':true,'Analytics':true,'Workflow Builder':true,'Reassign':true,'Delete':true}},
+};
+
+// ── RULE ENGINE CONSTANTS ────────────────────────────────────────────
+const COND_FIELDS=[
+  {v:'category',l:'CFPB Category'},{v:'priority',l:'Priority'},
+  {v:'regulatoryFlag',l:'Regulatory Flag'},{v:'channel',l:'Channel'},
+  {v:'state',l:'State'},{v:'narrative',l:'Narrative (contains)'},
+];
+const FIELD_OPTS={
+  category:Object.keys(CFPB_CATS),priority:['Critical','High','Medium','Low'],
+  regulatoryFlag:['RESPA','FCRA','UDAAP','ECOA','FDCPA'],
+  channel:['Phone','Email','Web Portal','Mobile App','Branch','Mail','Chat'],
+  state:STATES,narrative:null,
+};
+const ACT_TYPES=[
+  {v:'assign_to',l:'Assign To'},{v:'set_priority',l:'Set Priority'},
+  {v:'set_status',l:'Set Status'},{v:'add_note',l:'Add Audit Note'},
+];
+const ACT_OPTS={
+  assign_to:AGENTS,set_priority:['Critical','High','Medium','Low'],
+  set_status:['Open','In Review','Escalated'],add_note:null,
+};
+const DEFAULT_RULES=[
+  {id:'r1',priority:1,enabled:true,name:'FDCPA Auto-Escalation',
+   desc:'Escalate debt collection harassment to Regulatory Director',
+   conditions:[{field:'category',op:'eq',value:'Debt collection'},{field:'regulatoryFlag',op:'eq',value:'FDCPA'}],
+   condLogic:'AND',
+   actions:[{type:'set_status',value:'Escalated'},{type:'assign_to',value:'Ellen Hart'},{type:'set_priority',value:'Critical'},{type:'add_note',value:'Auto-escalated: FDCPA violation threshold triggered. Collection activity suspended pending investigation.'}]},
+  {id:'r2',priority:2,enabled:true,name:'Wire Transfer Fast-Track',
+   desc:'Route critical wire delays to Senior Operations immediately',
+   conditions:[{field:'category',op:'eq',value:'Money transfer, virtual currency, or money service'}],
+   condLogic:'AND',
+   actions:[{type:'assign_to',value:'Carlos Rivera'},{type:'set_priority',value:'Critical'},{type:'add_note',value:'Auto-routed: Wire transfer — Senior Ops fast-track queue.'}]},
+  {id:'r3',priority:3,enabled:true,name:'FCRA Credit Dispute Routing',
+   desc:'Route all FCRA disputes to the credit compliance specialist',
+   conditions:[{field:'regulatoryFlag',op:'eq',value:'FCRA'}],
+   condLogic:'AND',
+   actions:[{type:'assign_to',value:'Marcus Webb'},{type:'add_note',value:'Auto-routed: FCRA dispute — credit compliance specialist queue.'}]},
+  {id:'r4',priority:4,enabled:true,name:'Mortgage RESPA Compliance',
+   desc:'Route RESPA mortgage cases to mortgage compliance officer',
+   conditions:[{field:'category',op:'eq',value:'Mortgage'},{field:'regulatoryFlag',op:'eq',value:'RESPA'}],
+   condLogic:'AND',
+   actions:[{type:'assign_to',value:'Patricia Vega'},{type:'add_note',value:'Auto-routed: RESPA mortgage compliance queue.'}]},
+  {id:'r5',priority:5,enabled:true,name:'Branch Walk-In Priority Boost',
+   desc:'Elevate in-person branch complaints to High priority',
+   conditions:[{field:'channel',op:'eq',value:'Branch'},{field:'priority',op:'eq',value:'Medium'}],
+   condLogic:'AND',
+   actions:[{type:'set_priority',value:'High'},{type:'add_note',value:'Priority elevated: in-branch complaint per service standard.'}]},
+  {id:'r6',priority:6,enabled:false,name:'Texas State Compliance Flag',
+   desc:'Flag Texas cases for additional DOB state compliance review',
+   conditions:[{field:'state',op:'eq',value:'TX'}],
+   condLogic:'AND',
+   actions:[{type:'add_note',value:'TX state flag: Additional Texas DOB compliance review required.'}]},
+];
+
+// ── RULE ENGINE ──────────────────────────────────────────────────────
+function matchCond(c,cond){
+  const v=String(c[cond.field]||'');
+  if(cond.op==='eq')      return v===cond.value;
+  if(cond.op==='neq')     return v!==cond.value;
+  if(cond.op==='contains')return v.toLowerCase().includes((cond.value||'').toLowerCase());
+  return false;
+}
+function matchRule(complaint,rule){
+  if(!rule.conditions.length)return false;
+  const res=rule.conditions.map(c=>matchCond(complaint,c));
+  return rule.condLogic==='OR'?res.some(Boolean):res.every(Boolean);
+}
+function applyRules(complaint,rules){
+  const sorted=[...rules].filter(r=>r.enabled).sort((a,b)=>a.priority-b.priority);
+  let cur={...complaint};
+  const fired=[];
+  const ruleEvents=[];
+  for(const rule of sorted){
+    if(matchRule(cur,rule)){
+      fired.push(rule);
+      rule.actions.forEach((a,i)=>{
+        if(a.type==='assign_to')    cur={...cur,assignedTo:a.value};
+        if(a.type==='set_priority') cur={...cur,priority:a.value};
+        if(a.type==='set_status')   cur={...cur,status:a.value};
+        if(a.type==='add_note') ruleEvents.push({
+          id:`${complaint.id}-rule-${rule.id}-${i}`,caseId:complaint.id,
+          ts:new Date().toISOString(),actor:'Workflow Engine',actorRole:'System',
+          action:`⚡ [${rule.name}] ${a.value}`,type:'rule',
+        });
+      });
+    }
+  }
+  if(ruleEvents.length) cur={...cur,auditTrail:[...(cur.auditTrail||[]),...ruleEvents]};
+  return{result:cur,fired};
+}
+
+// ── MOCK DATA ────────────────────────────────────────────────────────
+const NOW=Date.now();const h=n=>n*3600000;
+const mk=(id,evts)=>evts.map((e,i)=>({id:`${id}-e${i+1}`,caseId:id,...e}));
+const SEED=[
+  {id:'CMP-2024-0847',submittedAt:new Date(NOW-h(52)).toISOString(),customerName:'Maria Rodriguez',accountLast4:'4821',branch:'Houston — Westheimer, TX',state:'TX',channel:'Phone',category:'Mortgage',issue:'Payment processing, late fee',priority:'Critical',status:'Open',slaDeadline:new Date(NOW-h(6)).toISOString(),assignedTo:'Sarah Chen',regulatoryFlag:'RESPA',narrative:'My mortgage payment was debited twice on January 15th. The duplicate charge of $2,847 caused an overdraft and $175 in fees. Three calls to customer service have not resolved this.',
+   auditTrail:mk('CMP-2024-0847',[
+    {ts:new Date(NOW-h(52)).toISOString(),actor:'IVR System',actorRole:'System',action:'Case auto-created via inbound phone call',type:'create'},
+    {ts:new Date(NOW-h(51.5)).toISOString(),actor:'AI Engine',actorRole:'System',action:'Classified: Mortgage → Payment processing | RESPA | Confidence 94% | Priority: Critical',type:'classify'},
+    {ts:new Date(NOW-h(48)).toISOString(),actor:'Workflow Engine',actorRole:'System',action:'⚡ [Mortgage RESPA Compliance] Auto-routed: RESPA mortgage compliance queue.',type:'rule'},
+    {ts:new Date(NOW-h(47)).toISOString(),actor:'Sarah Chen',actorRole:'Agent',action:'Overrode assignment, taking ownership.',type:'assign'},
+    {ts:new Date(NOW-h(30)).toISOString(),actor:'Sarah Chen',actorRole:'Agent',action:'Status: Open → In Review. Confirmed duplicate debit with core banking team.',type:'status'},
+   ])},
+  {id:'CMP-2024-0848',submittedAt:new Date(NOW-h(36)).toISOString(),customerName:'James Whitfield',accountLast4:'7734',branch:'Atlanta — Buckhead, GA',state:'GA',channel:'Email',category:'Credit card or prepaid card',issue:'Problem with a purchase shown on your statement',priority:'High',status:'In Review',slaDeadline:new Date(NOW+h(8)).toISOString(),assignedTo:'Marcus Webb',regulatoryFlag:'FCRA',narrative:'I did not authorize a charge of $349.99 on my Visa ending 7734 on January 12. I have never shopped at this merchant. Please reverse immediately.',
+   auditTrail:mk('CMP-2024-0848',[
+    {ts:new Date(NOW-h(36)).toISOString(),actor:'Email Parser',actorRole:'System',action:'Case created from inbound customer email',type:'create'},
+    {ts:new Date(NOW-h(35)).toISOString(),actor:'AI Engine',actorRole:'System',action:'Classified: Credit Card → Unauthorized charge | FCRA | Confidence 91%',type:'classify'},
+    {ts:new Date(NOW-h(34.5)).toISOString(),actor:'Workflow Engine',actorRole:'System',action:'⚡ [FCRA Credit Dispute Routing] Auto-routed: FCRA dispute — credit compliance specialist queue.',type:'rule'},
+    {ts:new Date(NOW-h(32)).toISOString(),actor:'Marcus Webb',actorRole:'Agent',action:'Status: Open → In Review. Provisional credit issued.',type:'assign'},
+   ])},
+  {id:'CMP-2024-0849',submittedAt:new Date(NOW-h(24)).toISOString(),customerName:'Priya Nair',accountLast4:'2293',branch:'Nashville — Downtown, TN',state:'TN',channel:'Web Portal',category:'Checking or savings account',issue:'Managing an account',priority:'High',status:'Open',slaDeadline:new Date(NOW+h(2)).toISOString(),assignedTo:null,regulatoryFlag:'UDAAP',narrative:'Locked out of online banking for 5 days. Failed 4 support calls. Cannot pay bills or transfer funds.',
+   auditTrail:mk('CMP-2024-0849',[
+    {ts:new Date(NOW-h(24)).toISOString(),actor:'Web Portal',actorRole:'System',action:'Case created via self-service portal',type:'create'},
+    {ts:new Date(NOW-h(23)).toISOString(),actor:'AI Engine',actorRole:'System',action:'Classified: Checking Account → Account access | UDAAP | Confidence 87%',type:'classify'},
+   ])},
+  {id:'CMP-2024-0850',submittedAt:new Date(NOW-h(72)).toISOString(),customerName:'Robert Callahan',accountLast4:'5560',branch:'Chicago — Loop, IL',state:'IL',channel:'Branch',category:'Auto loan or lease',issue:'Managing the loan or lease',priority:'Medium',status:'Resolved',slaDeadline:new Date(NOW-h(24)).toISOString(),assignedTo:'Diana Park',regulatoryFlag:'ECOA',narrative:'Auto loan rate changed after closing without consent. Rate went from 4.9% to 6.2%, contradicting signed loan documents.',
+   auditTrail:mk('CMP-2024-0850',[
+    {ts:new Date(NOW-h(72)).toISOString(),actor:'Branch Staff',actorRole:'Agent',action:'Case created at branch — walk-in customer',type:'create'},
+    {ts:new Date(NOW-h(71.5)).toISOString(),actor:'Workflow Engine',actorRole:'System',action:'⚡ [Branch Walk-In Priority Boost] Priority elevated: in-branch complaint per service standard.',type:'rule'},
+    {ts:new Date(NOW-h(71)).toISOString(),actor:'AI Engine',actorRole:'System',action:'Classified: Auto Loan → Interest rate dispute | ECOA | Confidence 89%',type:'classify'},
+    {ts:new Date(NOW-h(48)).toISOString(),actor:'Diana Park',actorRole:'Compliance',action:'Confirmed rate error. Corrected to 4.9%. Customer notified.',type:'note'},
+    {ts:new Date(NOW-h(26)).toISOString(),actor:'Diana Park',actorRole:'Compliance',action:'Status: In Review → Resolved. CFPB disclosure submitted.',type:'status'},
+   ])},
+  {id:'CMP-2024-0851',submittedAt:new Date(NOW-h(12)).toISOString(),customerName:'Aisha Johnson',accountLast4:'8847',branch:'Detroit — Midtown, MI',state:'MI',channel:'Phone',category:'Debt collection',issue:'Took or threatened to take negative or legal action',priority:'Critical',status:'Escalated',slaDeadline:new Date(NOW+h(4)).toISOString(),assignedTo:'Ellen Hart',regulatoryFlag:'FDCPA',narrative:'A collector called me 7 times yesterday, called my employer and disclosed my debt to HR, and threatened legal action after 9pm.',
+   auditTrail:mk('CMP-2024-0851',[
+    {ts:new Date(NOW-h(12)).toISOString(),actor:'IVR System',actorRole:'System',action:'Case created via phone',type:'create'},
+    {ts:new Date(NOW-h(11.5)).toISOString(),actor:'AI Engine',actorRole:'System',action:'Classified: Debt Collection → Harassment | FDCPA | Confidence 97% | Priority: Critical',type:'classify'},
+    {ts:new Date(NOW-h(11)).toISOString(),actor:'Workflow Engine',actorRole:'System',action:'⚡ [FDCPA Auto-Escalation] Status→Escalated, Assigned→Ellen Hart, Priority→Critical. Collection activity suspended.',type:'rule'},
+    {ts:new Date(NOW-h(9)).toISOString(),actor:'Ellen Hart',actorRole:'Director',action:'Acknowledged. Investigation opened.',type:'note'},
+   ])},
+  {id:'CMP-2024-0852',submittedAt:new Date(NOW-h(8)).toISOString(),customerName:'Thomas Nguyen',accountLast4:'3318',branch:'Phoenix — Central, AZ',state:'AZ',channel:'Web Portal',category:'Student loan',issue:'Dealing with my lender or servicer',priority:'Medium',status:'Open',slaDeadline:new Date(NOW+h(36)).toISOString(),assignedTo:null,regulatoryFlag:null,narrative:'Made a $750 payment December 28th still showing as outstanding on January statement. Have bank confirmation BKCONF-8847321.',
+   auditTrail:mk('CMP-2024-0852',[
+    {ts:new Date(NOW-h(8)).toISOString(),actor:'Web Portal',actorRole:'System',action:'Case created via portal',type:'create'},
+    {ts:new Date(NOW-h(7.5)).toISOString(),actor:'AI Engine',actorRole:'System',action:'Classified: Student Loan → Payment not applied | No flag | Confidence 85%',type:'classify'},
+   ])},
+  {id:'CMP-2024-0853',submittedAt:new Date(NOW-h(5)).toISOString(),customerName:'Sandra Martinez',accountLast4:'6621',branch:'San Antonio — North Star, TX',state:'TX',channel:'Mobile App',category:'Checking or savings account',issue:'Problem with a debit or ATM card',priority:'Low',status:'Open',slaDeadline:new Date(NOW+h(115)).toISOString(),assignedTo:null,regulatoryFlag:null,narrative:'Charged $3.50 ATM fee at my own branch ATM. I have the Gold Member plan which waives all 1FFC ATM fees.',
+   auditTrail:mk('CMP-2024-0853',[
+    {ts:new Date(NOW-h(5)).toISOString(),actor:'Mobile App',actorRole:'System',action:'Case created via mobile app',type:'create'},
+    {ts:new Date(NOW-h(4.5)).toISOString(),actor:'AI Engine',actorRole:'System',action:'Classified: Checking Account → ATM fee dispute | No flag | Confidence 92%',type:'classify'},
+   ])},
+  {id:'CMP-2024-0854',submittedAt:new Date(NOW-h(96)).toISOString(),customerName:'Derek Thompson',accountLast4:'9904',branch:'Charlotte — Uptown, NC',state:'NC',channel:'Mail',category:'Mortgage',issue:'Escrow account',priority:'High',status:'Resolved',slaDeadline:new Date(NOW-h(48)).toISOString(),assignedTo:'Patricia Vega',regulatoryFlag:'RESPA',narrative:'Escrow shortage of $1,200 caused by incorrect property tax estimation at origination.',
+   auditTrail:mk('CMP-2024-0854',[
+    {ts:new Date(NOW-h(96)).toISOString(),actor:'Mail Room',actorRole:'System',action:'Written complaint scanned and ingested',type:'create'},
+    {ts:new Date(NOW-h(95)).toISOString(),actor:'AI Engine',actorRole:'System',action:'Classified: Mortgage → Escrow | RESPA | Confidence 96%',type:'classify'},
+    {ts:new Date(NOW-h(94.5)).toISOString(),actor:'Workflow Engine',actorRole:'System',action:'⚡ [Mortgage RESPA Compliance] Auto-routed: RESPA mortgage compliance queue.',type:'rule'},
+    {ts:new Date(NOW-h(52)).toISOString(),actor:'Patricia Vega',actorRole:'Compliance',action:'Escrow corrected. 12-month repayment plan offered. Resolved.',type:'status'},
+   ])},
+  {id:'CMP-2024-0855',submittedAt:new Date(NOW-h(3)).toISOString(),customerName:'Karen Liu',accountLast4:'1127',branch:'Seattle — Bellevue, WA',state:'WA',channel:'Email',category:'Credit reporting',issue:'Incorrect information on your report',priority:'High',status:'Open',slaDeadline:new Date(NOW+h(42)).toISOString(),assignedTo:'Marcus Webb',regulatoryFlag:'FCRA',narrative:'Credit report shows 30-day late for November 2023 but I have proof of on-time payment. Dropping my score ~40 points.',
+   auditTrail:mk('CMP-2024-0855',[
+    {ts:new Date(NOW-h(3)).toISOString(),actor:'Email Parser',actorRole:'System',action:'Case created from customer email',type:'create'},
+    {ts:new Date(NOW-h(2.5)).toISOString(),actor:'AI Engine',actorRole:'System',action:'Classified: Credit Reporting → Incorrect info | FCRA | Confidence 98%',type:'classify'},
+    {ts:new Date(NOW-h(2)).toISOString(),actor:'Workflow Engine',actorRole:'System',action:'⚡ [FCRA Credit Dispute Routing] Auto-routed: FCRA dispute — credit compliance specialist queue.',type:'rule'},
+   ])},
+  {id:'CMP-2024-0856',submittedAt:new Date(NOW-h(1)).toISOString(),customerName:'Michael Foster',accountLast4:'5582',branch:'Miami — Brickell, FL',state:'FL',channel:'Phone',category:'Money transfer, virtual currency, or money service',issue:'Money was not available when promised',priority:'Critical',status:'Open',slaDeadline:new Date(NOW+h(20)).toISOString(),assignedTo:'Carlos Rivera',regulatoryFlag:'UDAAP',narrative:'International wire of $45,000 sent 8 days ago has not arrived. Real estate closing is tomorrow.',
+   auditTrail:mk('CMP-2024-0856',[
+    {ts:new Date(NOW-h(1)).toISOString(),actor:'IVR System',actorRole:'System',action:'Case created — $25K+ wire threshold flag',type:'create'},
+    {ts:new Date(NOW-h(.75)).toISOString(),actor:'AI Engine',actorRole:'System',action:'Classified: Wire Transfer → Delay | UDAAP | Confidence 91% | Priority: Critical',type:'classify'},
+    {ts:new Date(NOW-h(.5)).toISOString(),actor:'Workflow Engine',actorRole:'System',action:'⚡ [Wire Transfer Fast-Track] Assigned→Carlos Rivera, Priority→Critical.',type:'rule'},
+   ])},
+];
+
+// ── ANALYTICS MOCK DATA ──────────────────────────────────────────────
+const MONTHLY=[{m:'Aug',n:31},{m:'Sep',n:38},{m:'Oct',n:44},{m:'Nov',n:29},{m:'Dec',n:52},{m:'Jan',n:SEED.length,cur:true}];
+const DAILY=[2,3,1,4,3,5,2,4,3,2,5,3,4,SEED.length].map((n,i)=>({d:new Date(NOW-(13-i)*86400000).toLocaleDateString('en-US',{month:'short',day:'numeric'}),n}));
+const RES_TIMES={'Mortgage':3.2,'Credit card or prepaid card':4.1,'Checking or savings account':2.8,'Auto loan or lease':5.6,'Debt collection':2.1,'Credit reporting':6.4,'Student loan':4.8,'Money transfer, virtual currency, or money service':1.9};
+
+// ── UTILITIES ────────────────────────────────────────────────────────
+const fmtD  =iso=>new Date(iso).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+const fmtDT =iso=>new Date(iso).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit',hour12:true});
+const fmtTS =iso=>{const d=new Date(iso);return d.toLocaleString('en-US',{month:'2-digit',day:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).replace(',','');};
+function getSLA(c){
+  const diff=new Date(c.slaDeadline)-Date.now();
+  if(diff<0)return{s:'breach',label:'BREACHED',cls:'sla-breach'};
+  const hrs=diff/3600000;
+  if(hrs<4)return{s:'warn',label:`${Math.ceil(hrs)}h left`,cls:'sla-warn'};
+  const days=Math.floor(hrs/24),remH=Math.ceil(hrs%24);
+  return{s:'ok',label:days>0?`${days}d ${remH}h`:`${Math.ceil(hrs)}h`,cls:'sla-ok'};
+}
+function useTick(){const[t,setT]=useState(0);useEffect(()=>{const id=setInterval(()=>setT(x=>x+1),1000);return()=>clearInterval(id);},[]);return t;}
+function exportCSV(rows,fn){if(!rows.length)return;const h=Object.keys(rows[0]);const csv=[h.join(','),...rows.map(r=>h.map(k=>`"${String(r[k]||'').replace(/"/g,'""')}"`).join(','))].join('\n');const b=new Blob([csv],{type:'text/csv'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=fn;a.click();URL.revokeObjectURL(u);}
+function newId(list){const ns=list.map(c=>parseInt(c.id.split('-')[2]||0,10));return`CMP-2024-${String(Math.max(...ns)+1).padStart(4,'0')}`;}
+let _rid=100;const uid=()=>`r${++_rid}`;
+
+// ── SMALL COMPONENTS ─────────────────────────────────────────────────
+function StatusBadge({s}){const m={Open:'bo','In Review':'br',Resolved:'bres',Closed:'bcl',Escalated:'besc'};const ic={Open:'○','In Review':'◑',Resolved:'●',Closed:'✕',Escalated:'⚠'};return<span className={`badge ${m[s]||'bcl'}`}>{ic[s]} {s}</span>;}
+function PBadge({p}){const m={Critical:'bcrit',High:'bhi',Medium:'bmed',Low:'blo'};return<span className={`badge ${m[p]||'blo'}`}>{p}</span>;}
+function RegBadge({flag}){if(!flag)return<span className="badge bnone">—</span>;return<span className={`badge b${flag}`}>{flag}</span>;}
+function SLATimer({c}){useTick();const sla=getSLA(c);return<span className={`sla ${sla.cls}`}><span className="sla-dot"/>{sla.label}</span>;}
+
+function Toggle({val,onChange}){
+  return<div className="toggle" style={{background:val?'var(--emerald)':'var(--g300)'}} onClick={()=>onChange(!val)}>
+    <div className="toggle-thumb" style={{left:val?18:2}}/>
+  </div>;
+}
+
+function Toast({msg,onDone}){
+  useEffect(()=>{if(msg){const t=setTimeout(onDone,3500);return()=>clearTimeout(t);}},[msg]);
+  if(!msg)return null;
+  return<div className="toast">{msg}</div>;
+}
+
+function RolePill({role,onClick}){
+  const cfg=ROLES_CFG[role];
+  return<div className="role-pill" style={{borderColor:cfg.color,color:cfg.color}} onClick={onClick}>
+    <span>{cfg.icon}</span><span>{cfg.label}</span><span style={{fontSize:9,opacity:.6}}>▼</span>
+  </div>;
+}
+
+function RoleModal({role,onSelect,onClose}){
+  return<div className="modal-ov" onClick={onClose}>
+    <div className="modal" onClick={e=>e.stopPropagation()}>
+      <div className="modal-title">Switch Role</div>
+      <div className="modal-sub">Simulates RBAC — each role has different screen access and permissions.</div>
+      <div className="role-cards">
+        {Object.entries(ROLES_CFG).map(([k,cfg])=>(
+          <div key={k} className={`role-card ${role===k?'sel':''}`} onClick={()=>{onSelect(k);onClose();}}>
+            <div className="rc-icon">{cfg.icon}</div>
+            <div className="rc-title">{cfg.label}</div>
+            <div className="rc-desc">{cfg.desc}</div>
+            {Object.entries(cfg.perms).map(([p,ok])=>(
+              <div key={p} className="perm">
+                <span style={{color:ok?'var(--emerald)':'var(--g300)',fontWeight:700}}>{ok?'✓':'✕'}</span>
+                <span style={{color:ok?'var(--g700)':'var(--g400)',fontSize:'10.5px'}}>{p}</span>
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+      <div style={{marginTop:18,display:'flex',justifyContent:'flex-end'}}><button className="btn btn-sec btn-sm" onClick={onClose}>Close</button></div>
+    </div>
+  </div>;
+}
+
+// ── CASE DRAWER ──────────────────────────────────────────────────────
+function CaseDrawer({complaint,role,onClose,onUpdate,showToast}){
+  const[status,setStatus]=useState(complaint.status);
+  const[note,setNote]=useState('');
+  const[assignee,setAssignee]=useState(complaint.assignedTo||'');
+  const save=()=>{
+    const evts=[];
+    if(status!==complaint.status)evts.push({id:`${complaint.id}-eu${Date.now()}a`,caseId:complaint.id,ts:new Date().toISOString(),actor:'Ellen Hart',actorRole:'Director',action:`Status: ${complaint.status} → ${status}`,type:'status'});
+    if(note.trim())evts.push({id:`${complaint.id}-eu${Date.now()}b`,caseId:complaint.id,ts:new Date().toISOString(),actor:'Ellen Hart',actorRole:'Director',action:`Note: ${note.trim()}`,type:'note'});
+    if(assignee!==complaint.assignedTo)evts.push({id:`${complaint.id}-eu${Date.now()}c`,caseId:complaint.id,ts:new Date().toISOString(),actor:'Ellen Hart',actorRole:'Director',action:`Reassigned to ${assignee||'Unassigned'}`,type:'assign'});
+    onUpdate(complaint.id,{status,assignedTo:assignee||null,auditTrail:[...complaint.auditTrail,...evts]});
+    showToast('✅ Case updated');onClose();
+  };
+  return<div className="drawer-ov" onClick={onClose}>
+    <div className="drawer" onClick={e=>e.stopPropagation()}>
+      <div className="dw-hdr">
+        <div className="dw-info">
+          <div className="dw-id">{complaint.id} · {complaint.channel} · {fmtD(complaint.submittedAt)}</div>
+          <div className="dw-name">{complaint.customerName}</div>
+          <div className="dw-sub">Acct ···{complaint.accountLast4} · {complaint.branch}</div>
+        </div>
+        <button className="dw-close" onClick={onClose}>✕</button>
+      </div>
+      <div className="dw-body">
+        <div className="dw-sec">
+          <div style={{display:'flex',gap:6,flexWrap:'wrap',marginBottom:10}}>
+            <StatusBadge s={complaint.status}/><PBadge p={complaint.priority}/><RegBadge flag={complaint.regulatoryFlag}/><SLATimer c={complaint}/>
+          </div>
+        </div>
+        <div className="dw-sec">
+          <div className="dw-sec-title">Classification</div>
+          <div className="detail-grid">
+            <div className="di"><label>CFPB Category</label><span>{complaint.category}</span></div>
+            <div className="di"><label>Issue</label><span style={{fontSize:12}}>{complaint.issue}</span></div>
+            <div className="di"><label>Assigned To</label><span>{complaint.assignedTo||'Unassigned'}</span></div>
+            <div className="di"><label>SLA Deadline</label><span className="mono">{fmtDT(complaint.slaDeadline)}</span></div>
+          </div>
+        </div>
+        <div className="dw-sec">
+          <div className="dw-sec-title">Customer Narrative</div>
+          <div className="narr">{complaint.narrative}</div>
+        </div>
+        <div className="dw-sec">
+          <div className="dw-sec-title">Audit Trail</div>
+          <div className="tl">
+            {[...complaint.auditTrail].reverse().map(e=>(
+              <div key={e.id} className="tl-item">
+                <div className={`tl-dot ${e.type}`}/>
+                <div className="tl-ts">{fmtTS(e.ts)}</div>
+                <div className="tl-action">{e.action}</div>
+                <div className="tl-actor">{e.actor} · {e.actorRole}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+        {role!=='agent'&&<div className="dw-sec">
+          <div className="divider"/>
+          <div className="dw-sec-title">Update Case</div>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:10}}>
+            <div className="fg"><label>Status</label><select value={status} onChange={e=>setStatus(e.target.value)}>{['Open','In Review','Escalated','Resolved','Closed'].map(s=><option key={s}>{s}</option>)}</select></div>
+            <div className="fg"><label>Assigned To</label><input value={assignee} onChange={e=>setAssignee(e.target.value)} placeholder="Agent name"/></div>
+          </div>
+          <div className="fg" style={{marginBottom:12}}><label>Add Note</label><textarea value={note} onChange={e=>setNote(e.target.value)} rows={2} placeholder="Internal note…"/></div>
+          <div style={{display:'flex',gap:8}}>
+            <button className="btn btn-navy btn-sm" onClick={save}>Save Changes</button>
+            <button className="btn btn-sec btn-sm" onClick={onClose}>Cancel</button>
+          </div>
+        </div>}
+      </div>
+    </div>
+  </div>;
+}
+
+// ── DASHBOARD ────────────────────────────────────────────────────────
+function DashboardScreen({complaints,role,onSelect,onNew}){
+  useTick();
+  const[filt,setFilt]=useState('All');
+  const[q,setQ]=useState('');
+  const tabs=['All','Open','In Review','Escalated','Resolved'];
+  const breached=complaints.filter(c=>getSLA(c).s==='breach'&&c.status!=='Resolved'&&c.status!=='Closed').length;
+  const visible=complaints.filter(c=>{
+    const mt=filt==='All'||c.status===filt;
+    const mq=!q||[c.customerName,c.id,c.category,c.branch].join(' ').toLowerCase().includes(q.toLowerCase());
+    return mt&&mq;
+  });
+  return<div>
+    <div className="kpi-grid">
+      <div className="kpi nl"><div className="kpi-label">Total Cases</div><div className="kpi-val">{complaints.length}</div><div className="kpi-sub">All time</div></div>
+      <div className="kpi al"><div className="kpi-label">Open</div><div className="kpi-val">{complaints.filter(c=>c.status==='Open').length}</div><div className="kpi-sub">Awaiting action</div></div>
+      <div className="kpi rl"><div className="kpi-label">SLA Breaches</div><div className="kpi-val" style={{color:'var(--red)'}}>{breached}</div><div className="kpi-sub">Require immediate action</div></div>
+      <div className="kpi el"><div className="kpi-label">Resolved</div><div className="kpi-val" style={{color:'var(--emerald)'}}>{complaints.filter(c=>c.status==='Resolved').length}</div><div className="kpi-sub">SLA maintained</div></div>
+    </div>
+    {breached>0&&<div style={{background:'#FEF2F2',border:'1px solid #FECACA',borderRadius:9,padding:'10px 14px',marginBottom:16,display:'flex',alignItems:'center',gap:10,fontSize:12.5}}>
+      <span style={{color:'var(--red)',fontWeight:700,fontSize:16}}>⚠</span>
+      <span style={{color:'var(--red-dk)',fontWeight:600}}>{breached} case{breached>1?'s':''} have exceeded SLA deadline.</span>
+      <button className="btn btn-red btn-xs" style={{marginLeft:'auto'}} onClick={()=>setFilt('All')}>Review Now</button>
+    </div>}
+    <div className="card">
+      <div style={{padding:'14px 16px',borderBottom:'1px solid var(--g200)',display:'flex',alignItems:'center',gap:12,flexWrap:'wrap'}}>
+        <div className="pill-tabs">{tabs.map(t=><button key={t} className={`ptab ${filt===t?'active':''}`} onClick={()=>setFilt(t)}>{t}</button>)}</div>
+        <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Search cases, customers, branches…" style={{marginLeft:'auto',padding:'6px 11px',border:'1.5px solid var(--g200)',borderRadius:7,fontSize:12,width:240,outline:'none'}}/>
+        <button className="btn btn-navy btn-sm" onClick={onNew}>+ New Complaint</button>
+      </div>
+      <div style={{overflowX:'auto'}}>
+        <table className="tbl">
+          <thead><tr><th>Case ID</th><th>Customer</th><th>Branch</th><th>Category</th><th>Priority</th><th>Status</th><th>Reg. Flag</th><th>SLA</th><th>Assigned</th></tr></thead>
+          <tbody>
+            {!visible.length&&<tr className="nh"><td colSpan={9} style={{textAlign:'center',padding:28,color:'var(--g500)'}}>No cases match filter.</td></tr>}
+            {visible.map(c=><tr key={c.id} onClick={()=>onSelect(c)}>
+              <td><span className="case-id">{c.id}</span></td>
+              <td><div style={{fontWeight:600,color:'var(--g900)',fontSize:13}}>{c.customerName}</div><div style={{fontSize:11,color:'var(--g500)'}}>···{c.accountLast4}</div></td>
+              <td style={{maxWidth:150,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',fontSize:12}}>{c.branch}</td>
+              <td style={{fontSize:12,color:'var(--g600)'}}>{c.category}</td>
+              <td><PBadge p={c.priority}/></td>
+              <td><StatusBadge s={c.status}/></td>
+              <td><RegBadge flag={c.regulatoryFlag}/></td>
+              <td><SLATimer c={c}/></td>
+              <td style={{fontSize:12,color:'var(--g600)'}}>{c.assignedTo||<span style={{color:'var(--g400)'}}>Unassigned</span>}</td>
+            </tr>)}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>;
+}
+
+// ── INTAKE (rules fire here) ─────────────────────────────────────────
+function IntakeScreen({complaints,rules,onSubmit}){
+  const[form,setForm]=useState({customerName:'',accountLast4:'',channel:'Phone',branch:'',state:'',category:'',issue:'',priority:'Medium',narrative:''});
+  const[errs,setErrs]=useState({});
+  const[success,setSuccess]=useState(null);
+  const[rulesFired,setRulesFired]=useState([]);
+  const set=(k,v)=>setForm(f=>({...f,[k]:v,...(k==='category'?{issue:''}:{})}));
+  const issues=form.category?(CFPB_CATS[form.category]||[]):[];
+  const validate=()=>{const e={};if(!form.customerName.trim())e.customerName='Required';if(!form.accountLast4.match(/^\d{4}$/))e.accountLast4='4 digits';if(!form.branch)e.branch='Required';if(!form.category)e.category='Required';if(!form.issue)e.issue='Required';if(form.narrative.length<20)e.narrative='At least 20 characters';return e;};
+  const submit=()=>{
+    const e=validate();setErrs(e);if(Object.keys(e).length)return;
+    const id=newId(complaints);const now=new Date().toISOString();
+    const slaH={Critical:24,High:48,Medium:120,Low:240}[form.priority]||120;
+    let newCase={id,submittedAt:now,customerName:form.customerName,accountLast4:form.accountLast4,branch:form.branch,state:form.branch.match(/,\s*(\w{2})$/)?.[1]||'TX',channel:form.channel,category:form.category,issue:form.issue,priority:form.priority,status:'Open',slaDeadline:new Date(Date.now()+slaH*3600000).toISOString(),assignedTo:null,regulatoryFlag:null,narrative:form.narrative,
+      auditTrail:[{id:`${id}-e1`,caseId:id,ts:now,actor:'Intake Form',actorRole:'System',action:`Case created via ${form.channel}`,type:'create'}]};
+    const{result,fired}=applyRules(newCase,rules);
+    setRulesFired(fired);setSuccess(result.id);onSubmit(result,fired);
+  };
+  if(success)return<div className="card cp" style={{maxWidth:600,margin:'0 auto',textAlign:'center',padding:40}}>
+    <div style={{fontSize:48,marginBottom:12}}>✅</div>
+    <div style={{fontSize:20,fontWeight:800,marginBottom:6}}>Complaint Submitted</div>
+    <div className="case-id" style={{fontSize:18,marginBottom:12}}>{success}</div>
+    {rulesFired.length>0&&<div style={{background:'var(--blue-tint)',border:'1px solid var(--blue-mid)',borderRadius:9,padding:'12px 16px',marginBottom:16,textAlign:'left'}}>
+      <div style={{fontSize:12,fontWeight:700,color:'var(--navy)',marginBottom:8}}>⚡ {rulesFired.length} Workflow Rule{rulesFired.length>1?'s':''} Fired Automatically</div>
+      {rulesFired.map(r=><div key={r.id} style={{fontSize:12,color:'var(--navy)',marginBottom:4,display:'flex',alignItems:'center',gap:6}}>
+        <span style={{color:'var(--emerald)',fontWeight:700}}>✓</span>{r.name}
+        <span style={{fontSize:11,color:'var(--g500)',marginLeft:'auto'}}>{r.actions.map(a=>`${a.type.replace('_',' ')}: ${a.value}`).join(' · ')}</span>
+      </div>)}
+    </div>}
+    <div style={{fontSize:13,color:'var(--g600)',marginBottom:24}}>Case created, classified, and routing rules applied. Customer acknowledgment sent within 1 business day.</div>
+    <button className="btn btn-navy" onClick={()=>{setSuccess(null);setRulesFired([]);setForm({customerName:'',accountLast4:'',channel:'Phone',branch:'',state:'',category:'',issue:'',priority:'Medium',narrative:''});}}>Submit Another</button>
+  </div>;
+  return<div style={{maxWidth:720}}>
+    <div className="card cp">
+      <div style={{marginBottom:18,paddingBottom:14,borderBottom:'1px solid var(--g200)'}}>
+        <div style={{fontSize:15,fontWeight:700,marginBottom:3}}>New Complaint Intake</div>
+        <div style={{fontSize:12.5,color:'var(--g500)'}}>Submission triggers AI classification and automated routing rules.</div>
+      </div>
+      <div style={{marginBottom:16}}>
+        <div style={{fontSize:11,fontWeight:700,color:'var(--g500)',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:10}}>Customer Information</div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
+          <div className="fg"><label>Customer Name *</label><input value={form.customerName} onChange={e=>set('customerName',e.target.value)} placeholder="Full legal name"/>{errs.customerName&&<span className="ferr">{errs.customerName}</span>}</div>
+          <div className="fg"><label>Account Last 4 *</label><input value={form.accountLast4} onChange={e=>set('accountLast4',e.target.value.replace(/\D/,'').slice(0,4))} placeholder="4821" maxLength={4}/>{errs.accountLast4&&<span className="ferr">{errs.accountLast4}</span>}</div>
+          <div className="fg"><label>Channel</label><select value={form.channel} onChange={e=>set('channel',e.target.value)}>{['Phone','Email','Web Portal','Mobile App','Branch','Mail','Chat'].map(c=><option key={c}>{c}</option>)}</select></div>
+          <div className="fg"><label>Branch *</label><select value={form.branch} onChange={e=>set('branch',e.target.value)}><option value="">— Select —</option>{BRANCHES.map(b=><option key={b}>{b}</option>)}</select>{errs.branch&&<span className="ferr">{errs.branch}</span>}</div>
+        </div>
+      </div>
+      <div style={{marginBottom:16}}>
+        <div style={{fontSize:11,fontWeight:700,color:'var(--g500)',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:10}}>Classification</div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
+          <div className="fg"><label>CFPB Category *</label><select value={form.category} onChange={e=>set('category',e.target.value)}><option value="">— Select —</option>{Object.keys(CFPB_CATS).map(c=><option key={c}>{c}</option>)}</select>{errs.category&&<span className="ferr">{errs.category}</span>}</div>
+          <div className="fg"><label>Issue *</label><select value={form.issue} onChange={e=>set('issue',e.target.value)} disabled={!form.category}><option value="">— Select —</option>{issues.map(i=><option key={i}>{i}</option>)}</select>{errs.issue&&<span className="ferr">{errs.issue}</span>}</div>
+          <div className="fg"><label>Priority</label><select value={form.priority} onChange={e=>set('priority',e.target.value)}>{['Critical','High','Medium','Low'].map(p=><option key={p}>{p}</option>)}</select></div>
+        </div>
+      </div>
+      <div style={{marginBottom:20}}>
+        <div className="fg"><label>Customer Statement *</label><textarea value={form.narrative} onChange={e=>set('narrative',e.target.value)} rows={4} placeholder="Customer's own words. Include dates, amounts, incidents. Min 20 chars."/><div style={{fontSize:10.5,color:'var(--g400)',textAlign:'right',marginTop:2}}>{form.narrative.length} chars</div>{errs.narrative&&<span className="ferr">{errs.narrative}</span>}</div>
+      </div>
+      <div style={{display:'flex',gap:10,paddingTop:14,borderTop:'1px solid var(--g200)'}}>
+        <button className="btn btn-navy" onClick={submit}>Submit &amp; Apply Rules</button>
+        <button className="btn btn-sec" onClick={()=>setForm({customerName:'',accountLast4:'',channel:'Phone',branch:'',state:'',category:'',issue:'',priority:'Medium',narrative:''})}>Clear</button>
+      </div>
+    </div>
+  </div>;
+}
+
+// ── AI CLASSIFIER ────────────────────────────────────────────────────
+const EXAMPLES=[
+  {l:'Mortgage double-payment',t:'My mortgage payment was debited twice from my checking account on the 15th. The duplicate charge of $2,847 caused an overdraft. Three calls to customer service have not resolved it.'},
+  {l:'Credit card fraud dispute',t:'There is an unauthorized charge of $349 from an unfamiliar online retailer on my credit card statement. I have never made a purchase from this company. This appears to be fraud.'},
+  {l:'FDCPA harassment complaint',t:'A debt collector has been calling me up to 8 times per day, called my employer and disclosed my debt to my HR manager, and threatened legal action at 9pm. These are clear FDCPA violations.'},
+];
+function classify(t){
+  const txt=t.toLowerCase();
+  if(txt.includes('mortgage')||txt.includes('escrow'))return{cat:'Mortgage',issue:'Payment processing, late fee',conf:94,sent:'Frustrated',pri:'High',flag:'RESPA',flagReason:'RESPA Section 6 requires timely response to written requests and error resolution.',sigs:['Mortgage servicing context','Payment error disputed','Escrow or billing dispute possible'],action:'Acknowledge within 5 days. Investigate payment records. Provide RESPA-compliant written response within 30 days.'};
+  if(txt.includes('unauthorized')||txt.includes('fraud'))return{cat:'Credit card or prepaid card',issue:'Problem with a purchase shown on your statement',conf:91,sent:'Alarmed',pri:'High',flag:'FCRA',flagReason:'FCRA Section 611 requires investigation of disputed account information.',sigs:['Unauthorized transaction disputed','Fraud indicators present','Customer denies transaction'],action:'Issue provisional credit within 5 days. Complete investigation within 30 days.'};
+  if(txt.includes('collector')||txt.includes('fdcpa')||txt.includes('harassment'))return{cat:'Debt collection',issue:'Took or threatened to take negative or legal action',conf:97,sent:'Distressed',pri:'Critical',flag:'FDCPA',flagReason:'FDCPA Section 806 prohibits harassment. Section 805 prohibits third-party contact.',sigs:['Multiple calls per day alleged','Third-party employer disclosure','Threatening language — after hours'],action:'Suspend collection activity immediately. Escalate to Compliance Director. Respond within 15 days.'};
+  if(txt.includes('credit report')||txt.includes('credit score'))return{cat:'Credit reporting',issue:'Incorrect information on your report',conf:98,sent:'Concerned',pri:'High',flag:'FCRA',flagReason:'FCRA Section 611 requires CRAs to investigate disputes and correct inaccurate info.',sigs:['Credit report inaccuracy disputed','Score impact stated','Furnisher error possible'],action:'Conduct reasonable investigation within 30 days. Correct or delete. Notify consumer of results.'};
+  return{cat:'Checking or savings account',issue:'Managing an account',conf:81,sent:'Frustrated',pri:'Medium',flag:null,flagReason:'No specific regulatory trigger. Monitor for pattern.',sigs:['General account servicing complaint','No acute regulatory trigger','Standard resolution path'],action:'Acknowledge within 1 business day. Investigate account records. Respond within 30 days.'};
+}
+function ClassifierScreen(){
+  const[txt,setTxt]=useState('');const[res,setRes]=useState(null);const[loading,setLoading]=useState(false);
+  const run=t=>{const inp=t||txt;if(!inp.trim())return;setLoading(true);setRes(null);setTimeout(()=>{setRes(classify(inp));setLoading(false);},900);};
+  return<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18}}>
+    <div>
+      <div className="card cp" style={{marginBottom:14}}>
+        <div style={{fontSize:14,fontWeight:700,marginBottom:12}}>Complaint Narrative</div>
+        <textarea value={txt} onChange={e=>setTxt(e.target.value)} rows={7} placeholder="Paste complaint text…" style={{width:'100%',marginBottom:10}}/>
+        <div style={{display:'flex',gap:8}}>
+          <button className="btn btn-navy" onClick={()=>run()} disabled={loading||!txt.trim()}>{loading?'Analyzing…':'🤖 Classify'}</button>
+          <button className="btn btn-sec btn-sm" onClick={()=>{setTxt('');setRes(null);}}>Clear</button>
+        </div>
+      </div>
+      <div className="card cp">
+        <div style={{fontSize:13,fontWeight:700,marginBottom:10}}>Examples</div>
+        {EXAMPLES.map((ex,i)=><button key={i} onClick={()=>{setTxt(ex.t);run(ex.t);}} style={{display:'block',width:'100%',textAlign:'left',padding:'10px 12px',border:'1.5px solid var(--g200)',borderRadius:7,cursor:'pointer',fontSize:12,color:'var(--g600)',background:'white',marginBottom:6,fontFamily:'Inter,sans-serif',transition:'all .15s'}} onMouseEnter={e=>e.currentTarget.style.borderColor='var(--navy)'} onMouseLeave={e=>e.currentTarget.style.borderColor='var(--g200)'}>
+          <span style={{fontWeight:600,color:'var(--navy)'}}>{ex.l}</span><br/>
+          <span style={{color:'var(--g400)',fontSize:11}}>{ex.t.slice(0,72)}…</span>
+        </button>)}
+      </div>
+    </div>
+    <div>
+      {loading&&<div className="card cp" style={{textAlign:'center',padding:40}}><div style={{fontSize:32,marginBottom:10}}>🤖</div><div style={{fontWeight:600}}>Analyzing…</div><div style={{fontSize:12,color:'var(--g500)',marginTop:4}}>Applying CFPB taxonomy and regulatory rules</div></div>}
+      {!loading&&!res&&<div className="card cp" style={{textAlign:'center',padding:48,color:'var(--g400)'}}><div style={{fontSize:32,marginBottom:10}}>🔍</div><div style={{fontSize:13}}>Paste a complaint and click Classify</div></div>}
+      {res&&<div className="card cp">
+        <div style={{display:'flex',alignItems:'center',marginBottom:14,paddingBottom:12,borderBottom:'1px solid var(--g100)'}}>
+          <span style={{fontSize:14,fontWeight:800,color:'var(--navy)'}}>Classification Result</span>
+          <span style={{marginLeft:'auto',fontSize:11,color:'var(--g500)'}}>{new Date().toLocaleTimeString()}</span>
+        </div>
+        {[['CFPB Category',res.cat],['Issue',res.issue],['Sentiment',res.sent],['Priority',<PBadge p={res.pri}/>],['Reg. Flag',<RegBadge flag={res.flag}/>]].map(([l,v],i)=><div key={i} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'8px 0',borderBottom:'1px solid var(--g100)'}}>
+          <span style={{fontSize:11,fontWeight:600,color:'var(--g500)',textTransform:'uppercase',letterSpacing:'.04em'}}>{l}</span>
+          <span style={{fontSize:13,fontWeight:600,color:'var(--g900)',textAlign:'right',maxWidth:200}}>{v}</span>
+        </div>)}
+        <div style={{padding:'8px 0',borderBottom:'1px solid var(--g100)'}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+            <span style={{fontSize:11,fontWeight:600,color:'var(--g500)',textTransform:'uppercase',letterSpacing:'.04em'}}>Confidence</span>
+            <span style={{fontSize:13,fontWeight:700}}>{res.conf}%</span>
+          </div>
+          <div style={{height:6,background:'var(--g100)',borderRadius:3,marginTop:4,overflow:'hidden'}}>
+            <div style={{width:`${res.conf}%`,height:'100%',borderRadius:3,background:res.conf>90?'var(--emerald)':res.conf>75?'var(--amber)':'var(--red)',transition:'width .8s ease'}}/>
+          </div>
+        </div>
+        {res.flag&&<div style={{background:'#FEF3C7',border:'1px solid #FDE68A',borderRadius:7,padding:'9px 12px',margin:'10px 0',fontSize:11.5,color:'var(--amber-dk)',lineHeight:1.5}}>⚖️ <strong>{res.flag}:</strong> {res.flagReason}</div>}
+        <div style={{marginTop:10}}>
+          <div style={{fontSize:11,fontWeight:700,color:'var(--g500)',textTransform:'uppercase',letterSpacing:'.05em',marginBottom:7}}>Signals</div>
+          {res.sigs.map((s,i)=><span key={i} style={{display:'inline-flex',alignItems:'center',padding:'3px 9px',borderRadius:20,fontSize:11,fontWeight:600,background:'var(--blue-tint)',color:'var(--navy)',margin:2}}>{s}</span>)}
+        </div>
+        <div style={{marginTop:14,background:'var(--blue-tint)',borderRadius:8,padding:'11px 13px'}}>
+          <div style={{fontSize:10.5,fontWeight:700,color:'var(--navy)',textTransform:'uppercase',letterSpacing:'.05em',marginBottom:5}}>Suggested Action</div>
+          <div style={{fontSize:12.5,color:'var(--navy)',lineHeight:1.5}}>{res.action}</div>
+        </div>
+      </div>}
+    </div>
+  </div>;
+}
+
+// ── CFPB REPORT ──────────────────────────────────────────────────────
+function CFPBScreen({complaints,role}){
+  const[cat,setCat]=useState('All');const[st,setSt]=useState('All');const[fl,setFl]=useState('All');const[stat,setStat]=useState('All');
+  if(!ROLES_CFG[role].perms['CFPB Export'])return<div className="access-wall"><div className="aw-icon">🔒</div><div className="aw-title">Access Restricted</div><div className="aw-desc">CFPB Reports require Compliance Officer or Administrator role.</div></div>;
+  const rows=complaints.filter(c=>{
+    if(cat!=='All'&&c.category!==cat)return false;
+    if(st!=='All'&&c.state!==st)return false;
+    if(fl==='None'&&c.regulatoryFlag)return false;
+    if(fl!=='All'&&fl!=='None'&&c.regulatoryFlag!==fl)return false;
+    if(stat!=='All'&&c.status!==stat)return false;
+    return true;
+  });
+  const flagged=rows.filter(c=>c.regulatoryFlag).length;
+  const open=rows.filter(c=>['Open','In Review','Escalated'].includes(c.status)).length;
+  const timely=rows.filter(c=>c.status==='Resolved'&&getSLA(c).s!=='breach').length;
+  const doExport=()=>exportCSV(rows.map(c=>({'Case ID':c.id,'Date':fmtD(c.submittedAt),'State':c.state,'Branch':c.branch,'Channel':c.channel,'CFPB Product':c.category,'Issue':c.issue,'Priority':c.priority,'Status':c.status,'Timely':getSLA(c).s!=='breach'?'Yes':'No','Reg Flag':c.regulatoryFlag||'','Assigned':c.assignedTo||''})),`1FFC_CFPB_${new Date().toISOString().split('T')[0]}.csv`);
+  return<div>
+    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:18}}>
+      <div><div style={{fontSize:17,fontWeight:800}}>CFPB Regulatory Report</div><div style={{fontSize:12.5,color:'var(--g500)',marginTop:2}}>Generated {fmtDT(new Date().toISOString())} · 1FFC Compliance</div></div>
+      <button className="btn btn-green btn-sm" onClick={doExport}>⬇ Export CSV ({rows.length})</button>
+    </div>
+    <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:10,marginBottom:18}}>
+      {[['Total',rows.length,''],['Reg. Flags',flagged,'var(--red)'],['Open/Pending',open,'var(--amber)'],['Timely',timely,'var(--emerald)'],['Resolution %',rows.length>0?Math.round(rows.filter(c=>c.status==='Resolved').length/rows.length*100)+'%':'-','']].map(([l,v,c],i)=><div key={i} style={{background:'white',border:'1px solid var(--g200)',borderRadius:8,padding:'12px 14px',textAlign:'center'}}><div style={{fontSize:20,fontWeight:800,color:c||'var(--g900)'}}>{v}</div><div style={{fontSize:10,fontWeight:600,color:'var(--g500)',textTransform:'uppercase',letterSpacing:'.04em',marginTop:2}}>{l}</div></div>)}
+    </div>
+    <div style={{display:'flex',gap:10,flexWrap:'wrap',padding:'12px 16px',background:'var(--g50)',borderRadius:9,marginBottom:18,border:'1px solid var(--g200)'}}>
+      {[['Category',cat,setCat,['All',...new Set(complaints.map(c=>c.category))]],['State',st,setSt,['All',...STATES]],['Reg. Flag',fl,setFl,['All','RESPA','FCRA','UDAAP','ECOA','FDCPA','None']],['Status',stat,setStat,['All','Open','In Review','Escalated','Resolved','Closed']]].map(([l,v,s,opts],i)=><div key={i} style={{display:'flex',flexDirection:'column',gap:4}}><label style={{fontSize:10.5,fontWeight:600,color:'var(--g500)'}}>{l}</label><select value={v} onChange={e=>s(e.target.value)} style={{padding:'6px 10px',fontSize:12,minWidth:140,outline:'none'}}>{opts.map(o=><option key={o}>{o}</option>)}</select></div>)}
+    </div>
+    <div className="card" style={{overflowX:'auto'}}>
+      <table className="tbl">
+        <thead><tr><th>Case ID</th><th>Date</th><th>State</th><th>CFPB Product</th><th>Priority</th><th>Status</th><th>Timely</th><th>Reg. Flag</th><th>Assigned</th></tr></thead>
+        <tbody>
+          {!rows.length&&<tr className="nh"><td colSpan={9} style={{textAlign:'center',padding:28,color:'var(--g500)'}}>No records match filters.</td></tr>}
+          {rows.map(c=>{const sl=getSLA(c);const tm=c.status==='Resolved'&&sl.s!=='breach';return<tr key={c.id} className="nh">
+            <td><span className="case-id">{c.id}</span></td>
+            <td><span className="mono">{fmtD(c.submittedAt)}</span></td>
+            <td><span className="badge bmed">{c.state}</span></td>
+            <td style={{fontSize:12,maxWidth:140,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{c.category}</td>
+            <td><PBadge p={c.priority}/></td>
+            <td><StatusBadge s={c.status}/></td>
+            <td><span className={`badge ${tm?'bres':c.status==='Resolved'?'besc':'br'}`}>{c.status==='Resolved'?(tm?'✓ Yes':'✕ No'):'Pending'}</span></td>
+            <td><RegBadge flag={c.regulatoryFlag}/></td>
+            <td style={{fontSize:12,color:'var(--g600)'}}>{c.assignedTo||'—'}</td>
+          </tr>;})}
+        </tbody>
+      </table>
+    </div>
+    <div className="info-bar">ℹ️ <strong>Compliance Notice:</strong> For internal use only. CFPB portal submissions require the approved HMDA/CFPB format. Regulatory flags are indicative — final determination requires attorney review.</div>
+  </div>;
+}
+
+// ── AUDIT LOG ────────────────────────────────────────────────────────
+function AuditScreen({complaints,role,onSelectCase}){
+  const[q,setQ]=useState('');const[typ,setTyp]=useState('All');const[cid,setCid]=useState('');
+  if(!ROLES_CFG[role].perms['Audit Log'])return<div className="access-wall"><div className="aw-icon">🔒</div><div className="aw-title">Access Restricted</div><div className="aw-desc">Audit Log requires Compliance Officer or Administrator role.</div></div>;
+  const all=complaints.flatMap(c=>c.auditTrail).sort((a,b)=>new Date(b.ts)-new Date(a.ts));
+  const TL={All:'All Events',create:'Created',classify:'Classified',status:'Status Change',assign:'Assignment',note:'Note',rule:'Rule Fired'};
+  const filtered=all.filter(e=>{
+    if(typ!=='All'&&e.type!==typ)return false;
+    if(cid&&!e.caseId.toLowerCase().includes(cid.toLowerCase()))return false;
+    if(q){const lq=q.toLowerCase();return e.action.toLowerCase().includes(lq)||e.actor.toLowerCase().includes(lq)||e.caseId.toLowerCase().includes(lq);}
+    return true;
+  });
+  const tc={create:'var(--navy)',classify:'var(--purple)',status:'var(--amber)',assign:'var(--emerald)',note:'var(--g400)',rule:'var(--sky)'};
+  return<div>
+    <div style={{marginBottom:18}}><div style={{fontSize:17,fontWeight:800,marginBottom:2}}>Immutable Audit Log</div><div style={{fontSize:12.5,color:'var(--g500)'}}>{all.length} total events across all cases</div></div>
+    <div style={{display:'flex',gap:10,flexWrap:'wrap',alignItems:'center',marginBottom:16}}>
+      <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Search actions, actors…" style={{padding:'7px 11px',border:'1.5px solid var(--g200)',borderRadius:7,fontSize:12,outline:'none',minWidth:200}}/>
+      <select value={typ} onChange={e=>setTyp(e.target.value)} style={{padding:'7px 11px',border:'1.5px solid var(--g200)',borderRadius:7,fontSize:12,outline:'none'}}>{Object.entries(TL).map(([k,v])=><option key={k} value={k}>{v}</option>)}</select>
+      <input value={cid} onChange={e=>setCid(e.target.value)} placeholder="Filter by Case ID…" style={{padding:'7px 11px',border:'1.5px solid var(--g200)',borderRadius:7,fontSize:12,outline:'none',minWidth:160}}/>
+      <span style={{fontSize:12,color:'var(--g500)',marginLeft:'auto'}}>{filtered.length} / {all.length} events</span>
+    </div>
+    <div style={{position:'relative',paddingLeft:28}}>
+      <div style={{position:'absolute',left:7,top:0,bottom:0,width:2,background:'var(--g200)'}}/>
+      {!filtered.length&&<div style={{textAlign:'center',padding:40,color:'var(--g500)'}}>No events match filters.</div>}
+      {filtered.map(e=><div key={e.id} style={{position:'relative',marginBottom:12,display:'flex',gap:14}}>
+        <div style={{position:'absolute',left:-23,top:4,width:12,height:12,borderRadius:'50%',background:tc[e.type]||'var(--g400)',border:'2px solid white',flexShrink:0}}/>
+        <div style={{flex:1,background:'white',border:'1px solid var(--g200)',borderRadius:8,padding:'10px 14px'}}>
+          <div style={{fontFamily:'JetBrains Mono,monospace',fontSize:10.5,color:'var(--g400)',marginBottom:2}}>{fmtTS(e.ts)}</div>
+          <div style={{fontSize:12.5,color:'var(--g700)',marginBottom:4,lineHeight:1.4}}>{e.action}</div>
+          <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+            <span style={{fontFamily:'JetBrains Mono,monospace',fontSize:10.5,fontWeight:600,color:'var(--navy)',background:'var(--blue-tint)',padding:'2px 7px',borderRadius:5,cursor:'pointer'}} onClick={()=>onSelectCase&&onSelectCase(e.caseId)}>{e.caseId}</span>
+            <span style={{fontSize:10.5,fontWeight:600,color:'var(--g600)',background:'var(--g100)',padding:'2px 7px',borderRadius:5}}>{e.actor}</span>
+            <span style={{fontSize:10.5,fontWeight:600,color:'white',background:tc[e.type]||'var(--g400)',padding:'2px 7px',borderRadius:5}}>{TL[e.type]||e.type}</span>
+          </div>
+        </div>
+      </div>)}
+    </div>
+  </div>;
+}
+
+// ── ANALYTICS (enhanced) ─────────────────────────────────────────────
+function AnalyticsScreen({complaints,role}){
+  if(!ROLES_CFG[role].perms['Analytics'])return<div className="access-wall"><div className="aw-icon">🔒</div><div className="aw-title">Access Restricted</div><div className="aw-desc">Analytics Dashboard requires Compliance Officer or Administrator role.</div></div>;
+  const total=complaints.length;
+  const resolved=complaints.filter(c=>c.status==='Resolved').length;
+  const breached=complaints.filter(c=>getSLA(c).s==='breach'&&c.status!=='Resolved').length;
+  const flagged=complaints.filter(c=>c.regulatoryFlag).length;
+  const slaComp=total?Math.round((total-breached)/total*100):100;
+  const rulesFired=complaints.flatMap(c=>c.auditTrail).filter(e=>e.type==='rule').length;
+
+  const maxM=Math.max(...MONTHLY.map(d=>d.n));
+  const maxD=Math.max(...DAILY.map(d=>d.n));
+  const catCounts=Object.entries(complaints.reduce((a,c)=>{a[c.category]=(a[c.category]||0)+1;return a;},{})).sort((a,b)=>b[1]-a[1]);
+  const maxCat=catCounts[0]?.[1]||1;
+  const CAT_COLS=['#0F2044','#1e3a6e','#3B82F6','#8B5CF6','#10B981','#F59E0B','#EF4444','#6B7280','#14B8A6'];
+  const flagCts=['RESPA','FCRA','UDAAP','ECOA','FDCPA'].map(f=>({f,n:complaints.filter(c=>c.regulatoryFlag===f).length})).filter(x=>x.n>0);
+  const maxFlag=Math.max(...flagCts.map(x=>x.n),1);
+  const FLAG_COLS={RESPA:'var(--purple)',FCRA:'#9D174D',UDAAP:'var(--amber)',ECOA:'var(--emerald)',FDCPA:'var(--sky)'};
+
+  // Branch heatmap
+  const branchMap=complaints.reduce((a,c)=>{const k=c.branch;if(!a[k])a[k]={branch:c.branch.split('—')[1]?.trim().split(',')[0]||c.branch,total:0,open:0,res:0,breach:0,flag:0};a[k].total++;if(['Open','In Review','Escalated'].includes(c.status))a[k].open++;if(c.status==='Resolved')a[k].res++;if(getSLA(c).s==='breach'&&c.status!=='Resolved')a[k].breach++;if(c.regulatoryFlag)a[k].flag++;return a;},{});
+  const branchRows=Object.values(branchMap).sort((a,b)=>b.total-a.total);
+  const heat=s=>{if(s>=80)return{bg:'#D1FAE5',color:'var(--emerald-dk)'};if(s>=60)return{bg:'#FEF3C7',color:'var(--amber-dk)'};return{bg:'#FEE2E2',color:'var(--red-dk)'};};
+
+  // Resolution time
+  const resCats=Object.entries(RES_TIMES).sort((a,b)=>b[1]-a[1]);
+  const maxRes=Math.max(...resCats.map(x=>x[1]));
+
+  // SVG gauge
+  const r=38,cx=50,cy=50,circ=2*Math.PI*r,filled=circ*(slaComp/100);
+  const gc=slaComp>=90?'var(--emerald)':slaComp>=75?'var(--amber)':'var(--red)';
+
+  return<div>
+    <div style={{marginBottom:18}}><div style={{fontSize:17,fontWeight:800,marginBottom:2}}>Analytics Dashboard</div><div style={{fontSize:12.5,color:'var(--g500)'}}>Live metrics across all branches · Updated each session</div></div>
+    <div className="kpi-grid">
+      <div className="kpi nl"><div className="kpi-label">Total Complaints</div><div className="kpi-val">{total}</div><div className="kpi-sub" style={{display:'flex',alignItems:'center',gap:4}}><span style={{color:'var(--red)',fontWeight:700,fontSize:11}}>↑14%</span> vs last month</div></div>
+      <div className="kpi el"><div className="kpi-label">Resolution Rate</div><div className="kpi-val" style={{color:'var(--emerald)'}}>{total?Math.round(resolved/total*100):0}%</div><div className="kpi-sub">{resolved} of {total} resolved</div></div>
+      <div className="kpi al"><div className="kpi-label">SLA Compliance</div><div className="kpi-val" style={{color:gc}}>{slaComp}%</div><div className="kpi-sub">{breached} active breach{breached!==1?'es':''}</div></div>
+      <div className="kpi nl" style={{borderLeftColor:'var(--sky)'}}><div className="kpi-label">Rules Fired</div><div className="kpi-val" style={{color:'var(--sky)'}}>{rulesFired}</div><div className="kpi-sub">Automation events</div></div>
+    </div>
+
+    {/* Row 1: Volume + Sparkline + SLA Gauge */}
+    <div className="an-grid2" style={{marginBottom:16}}>
+      <div className="card cp">
+        <div className="chart-title">Complaint Volume — Last 6 Months</div>
+        <div className="v-bars">
+          {MONTHLY.map((d,i)=><div key={i} className="v-col">
+            <div className="v-val">{d.n}</div>
+            <div className="v-fill" style={{height:`${Math.round(d.n/maxM*100)}px`,background:d.cur?'var(--navy)':'var(--blue-tint)',border:d.cur?'none':'1px solid var(--blue-mid)'}}/>
+            <div className="v-lbl">{d.m}{d.cur?<><br/><span style={{color:'var(--navy)',fontWeight:700}}>●</span></>:''}</div>
+          </div>)}
+        </div>
+        <div className="divider" style={{margin:'14px 0 10px'}}/>
+        <div style={{fontSize:12,fontWeight:700,color:'var(--g700)',marginBottom:8}}>Daily Intake — Last 14 Days</div>
+        <div className="spark" style={{height:44}}>
+          {DAILY.map((d,i)=><div key={i} style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:2}}>
+            <div style={{width:'100%',background:i===DAILY.length-1?'var(--navy)':'var(--blue-mid)',borderRadius:'2px 2px 0 0',height:`${Math.round(d.n/maxD*36)}px`,minHeight:3}}/>
+          </div>)}
+        </div>
+      </div>
+      <div className="card cp">
+        <div className="chart-title">SLA Compliance Rate</div>
+        <div className="gauge-wrap">
+          <div className="gauge-ring">
+            <svg viewBox="0 0 100 100" style={{width:90,height:90,transform:'rotate(-90deg)'}}>
+              <circle cx={cx} cy={cy} r={r} fill="none" stroke="var(--g200)" strokeWidth="10"/>
+              <circle cx={cx} cy={cy} r={r} fill="none" stroke={gc} strokeWidth="10" strokeDasharray={`${filled} ${circ-filled}`} strokeLinecap="round"/>
+            </svg>
+            <div className="gauge-inner"><div className="gauge-pct" style={{color:gc}}>{slaComp}%</div><div className="gauge-lbl">On-time</div></div>
+          </div>
+          <div style={{width:'100%'}}>
+            {[['✓ On-time',total-breached,'var(--emerald)'],['✕ Breached',breached,'var(--red)']].map(([l,n,c],i)=><div key={i} style={{display:'flex',justifyContent:'space-between',padding:'6px 0',borderBottom:i===0?'1px solid var(--g100)':'none'}}>
+              <span style={{fontSize:12,color:c,fontWeight:600}}>{l}</span>
+              <span style={{fontSize:13,fontWeight:700}}>{n}</span>
+            </div>)}
+          </div>
+          <div className="divider"/>
+          <div style={{fontSize:11,fontWeight:700,color:'var(--g500)',textTransform:'uppercase',letterSpacing:'.05em',marginBottom:8}}>By Priority</div>
+          {['Critical','High','Medium','Low'].map(p=>{const cnt=complaints.filter(c=>c.priority===p).length;return<div key={p} style={{display:'flex',justifyContent:'space-between',padding:'4px 0',fontSize:12}}>
+            <PBadge p={p}/><span style={{fontWeight:700}}>{cnt}</span>
+          </div>;})}
+        </div>
+      </div>
+    </div>
+
+    {/* Row 2: Category bars + Flag distribution */}
+    <div className="an-grid2" style={{marginBottom:16}}>
+      <div className="card cp">
+        <div className="chart-title">Cases by CFPB Category</div>
+        <div className="h-bars">
+          {catCounts.slice(0,7).map(([cat,cnt],i)=><div key={i} className="h-row">
+            <div className="h-lbl" title={cat}>{cat}</div>
+            <div className="h-track"><div className="h-fill" style={{width:`${Math.round(cnt/maxCat*100)}%`,background:CAT_COLS[i]||'var(--navy)'}}>{cnt>=2&&<span>{cnt}</span>}</div></div>
+            <div className="h-cnt">{cnt}</div>
+          </div>)}
+        </div>
+      </div>
+      <div className="card cp">
+        <div className="chart-title">Regulatory Flag Distribution</div>
+        {!flagCts.length?<div style={{color:'var(--g400)',fontSize:12,textAlign:'center',padding:24}}>No flags</div>:<>
+          {flagCts.map(({f,n},i)=><div key={i} className="h-row" style={{marginBottom:8}}>
+            <div style={{width:50,flexShrink:0}}><RegBadge flag={f}/></div>
+            <div className="h-track" style={{flex:1}}><div className="h-fill" style={{width:`${Math.round(n/maxFlag*100)}%`,background:FLAG_COLS[f]||'var(--navy)'}}>{n>=1&&<span>{n}</span>}</div></div>
+            <div className="h-cnt">{n}</div>
+          </div>)}
+          <div className="divider"/>
+          <div style={{padding:'10px',background:'var(--g50)',borderRadius:8}}>
+            <div style={{fontSize:11,color:'var(--g500)',fontWeight:600,marginBottom:4}}>HIGHEST EXPOSURE</div>
+            {flagCts[0]&&<div style={{fontSize:13,fontWeight:700,color:'var(--navy)'}}>{flagCts[0].f} · {flagCts[0].n} case{flagCts[0].n!==1?'s':''}</div>}
+          </div>
+        </>}
+      </div>
+    </div>
+
+    {/* Row 3: Resolution time */}
+    <div className="card cp" style={{marginBottom:16}}>
+      <div className="chart-title">Avg. Resolution Time by Category (Days)</div>
+      <div className="h-bars">
+        {resCats.map(([cat,days],i)=><div key={i} className="h-row">
+          <div className="h-lbl" style={{width:200}} title={cat}>{cat}</div>
+          <div className="h-track" style={{flex:1}}><div className="h-fill" style={{width:`${Math.round(days/maxRes*100)}%`,background:days<=3?'var(--emerald)':days<=5?'var(--amber)':'var(--red)'}}>{days>=0.5&&<span style={{fontSize:11,fontWeight:700}}>{days}d</span>}</div></div>
+          <div className="h-cnt" style={{width:36}}>{days}d</div>
+        </div>)}
+      </div>
+    </div>
+
+    {/* Row 4: Branch heatmap */}
+    <div className="card" style={{overflowX:'auto'}}>
+      <div style={{padding:'14px 18px 10px'}}><div className="chart-title" style={{margin:0}}>Branch Performance Heatmap</div></div>
+      <table className="heatmap-tbl">
+        <thead><tr><th style={{textAlign:'left'}}>Branch</th><th>Cases</th><th>Open</th><th>Resolved</th><th>Breaches</th><th>Flagged</th><th>Res. Rate</th><th>Score</th></tr></thead>
+        <tbody>
+          {branchRows.map((b,i)=>{
+            const score=Math.round((b.total?b.res/b.total*100:0)*0.6+(b.breach===0?100:Math.max(0,100-b.breach*25))*0.4);
+            const hc=heat(score);
+            return<tr key={i} className="nh">
+              <td style={{fontWeight:600,color:'var(--g900)'}}>{b.branch}</td>
+              <td>{b.total}</td>
+              <td style={{background:b.open>1?'#FEF3C7':'transparent'}}>{b.open}</td>
+              <td style={{background:b.res>0?'#D1FAE5':'transparent'}}>{b.res}</td>
+              <td style={{background:b.breach>0?'#FEE2E2':'#D1FAE5',fontWeight:b.breach>0?700:400,color:b.breach>0?'var(--red-dk)':'var(--emerald-dk)'}}>{b.breach}</td>
+              <td style={{background:b.flag>0?'#EDE9FE':'transparent',color:b.flag>0?'var(--purple-dk)':'inherit'}}>{b.flag}</td>
+              <td style={{background:b.total?heat(b.total?Math.round(b.res/b.total*100):0).bg:'transparent'}}>{b.total?Math.round(b.res/b.total*100):0}%</td>
+              <td style={{background:hc.bg,color:hc.color,fontWeight:800,fontSize:14}}>{score}</td>
+            </tr>;
+          })}
+        </tbody>
+      </table>
+      <div style={{padding:'8px 18px 14px',fontSize:11,color:'var(--g500)'}}>Score = (Resolution Rate × 0.6) + (SLA Compliance × 0.4). Green ≥ 80, Yellow 60–79, Red &lt; 60.</div>
+    </div>
+  </div>;
+}
+
+// ── WORKFLOW BUILDER ─────────────────────────────────────────────────
+function WorkflowScreen({rules,onUpdate,complaints,role,showToast}){
+  const[editing,setEditing]=useState(null);
+  const[dragId,setDragId]=useState(null);
+  const[overId,setOverId]=useState(null);
+  const[testCaseId,setTestCaseId]=useState(complaints[0]?.id||'');
+  const[testRes,setTestRes]=useState(null);
+  const[showTester,setShowTester]=useState(false);
+  const totalFired=complaints.flatMap(c=>c.auditTrail).filter(e=>e.type==='rule').length;
+
+  if(!ROLES_CFG[role].perms['Workflow Builder'])return<div className="access-wall"><div className="aw-icon">🔒</div><div className="aw-title">Access Restricted</div><div className="aw-desc">Workflow Builder requires Compliance Officer or Administrator role.</div></div>;
+
+  // DnD
+  const onDragStart=(e,id)=>{setDragId(id);e.dataTransfer.effectAllowed='move';};
+  const onDragOver=(e,id)=>{e.preventDefault();setOverId(id);};
+  const onDrop=(e,targetId)=>{
+    e.preventDefault();
+    if(dragId===targetId){setDragId(null);setOverId(null);return;}
+    const arr=[...rules];
+    const from=arr.findIndex(r=>r.id===dragId),to=arr.findIndex(r=>r.id===targetId);
+    const[moved]=arr.splice(from,1);arr.splice(to,0,moved);
+    onUpdate(arr.map((r,i)=>({...r,priority:i+1})));
+    setDragId(null);setOverId(null);
+    showToast('⚡ Rule priority reordered');
+  };
+  const onDragEnd=()=>{setDragId(null);setOverId(null);};
+
+  const toggleRule=(id,val)=>onUpdate(rules.map(r=>r.id===id?{...r,enabled:val}:r));
+  const addRule=()=>{
+    const nr={id:uid(),priority:rules.length+1,enabled:true,name:'New Rule',desc:'',conditions:[{field:'category',op:'eq',value:''}],condLogic:'AND',actions:[{type:'assign_to',value:''}]};
+    onUpdate([...rules,nr]);setEditing(nr);
+  };
+  const saveRule=edited=>{
+    onUpdate(rules.map(r=>r.id===edited.id?edited:r));
+    setEditing(null);showToast('✅ Rule saved');
+  };
+  const deleteRule=id=>{onUpdate(rules.filter(r=>r.id!==id));setEditing(null);showToast('🗑 Rule deleted');};
+
+  const runTest=()=>{
+    const c=complaints.find(x=>x.id===testCaseId);
+    if(!c)return;
+    const res=rules.filter(r=>r.enabled).sort((a,b)=>a.priority-b.priority).map(rule=>{
+      const condRes=rule.conditions.map(cond=>({cond,matched:matchCond(c,cond)}));
+      const matched=rule.condLogic==='OR'?condRes.some(x=>x.matched):condRes.every(x=>x.matched);
+      return{rule,condRes,matched};
+    });
+    setTestRes(res);
+  };
+
+  const condSummary=r=>r.conditions.map(c=>`${c.field} ${c.op==='eq'?'=':c.op==='neq'?'≠':'contains'} "${c.value}"`).join(` ${r.condLogic} `);
+  const actSummary=r=>r.actions.map(a=>`${a.type.replace('_',' ')}: ${a.value||'…'}`);
+
+  return<div>
+    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:16}}>
+      <div>
+        <div style={{fontSize:17,fontWeight:800,marginBottom:2}}>Workflow &amp; Routing Rules</div>
+        <div style={{fontSize:12.5,color:'var(--g500)'}}>{rules.filter(r=>r.enabled).length} of {rules.length} rules active · {totalFired} automation events fired</div>
+      </div>
+      <div style={{display:'flex',gap:8}}>
+        <button className="btn btn-ghost btn-sm" onClick={()=>setShowTester(t=>!t)}>{showTester?'Hide':'▶ Live Tester'}</button>
+        <button className="btn btn-navy btn-sm" onClick={addRule}>+ Add Rule</button>
+      </div>
+    </div>
+
+    <div className="wf-shell">
+      {/* Rule List */}
+      <div>
+        <div style={{fontSize:11,fontWeight:700,color:'var(--g500)',textTransform:'uppercase',letterSpacing:'.07em',marginBottom:10}}>Rules (drag to reorder priority)</div>
+        {rules.map(rule=><div key={rule.id}
+          className={`rule-card ${editing?.id===rule.id?'active':''} ${overId===rule.id&&dragId!==rule.id?'drag-over':''} ${dragId===rule.id?'dragging':''}`}
+          draggable onDragStart={e=>onDragStart(e,rule.id)} onDragOver={e=>onDragOver(e,rule.id)} onDrop={e=>onDrop(e,rule.id)} onDragEnd={onDragEnd}
+        >
+          <span className="drag-handle" title="Drag to reorder">⋮⋮</span>
+          <div className="rule-priority">{rule.priority}</div>
+          <div className="rule-body">
+            <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:4}}>
+              <div className="rule-name" style={{opacity:rule.enabled?1:.45}}>{rule.name}</div>
+              {!rule.enabled&&<span className="badge bcl" style={{fontSize:9,padding:'1px 5px'}}>OFF</span>}
+            </div>
+            <div className="rule-cond-summary" style={{opacity:rule.enabled?1:.45}}>{condSummary(rule)||'No conditions'}</div>
+            <div className="rule-action-chips">
+              {actSummary(rule).map((a,i)=><span key={i} className="action-chip">{a}</span>)}
+            </div>
+          </div>
+          <div className="rule-controls">
+            <Toggle val={rule.enabled} onChange={v=>toggleRule(rule.id,v)}/>
+            <button style={{background:'none',border:'none',cursor:'pointer',fontSize:14,color:'var(--g500)',padding:'2px 4px',borderRadius:4}} onClick={()=>setEditing(editing?.id===rule.id?null:rule)} title="Edit">✏️</button>
+          </div>
+        </div>)}
+        {!rules.length&&<div style={{textAlign:'center',padding:32,color:'var(--g400)',fontSize:13}}>No rules yet. Click + Add Rule.</div>}
+      </div>
+
+      {/* Rule Editor */}
+      <div>
+        {!editing?<div className="editor-panel" style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',minHeight:320,color:'var(--g400)'}}>
+          <div style={{fontSize:36,marginBottom:12}}>⚙️</div>
+          <div style={{fontSize:13,fontWeight:600,color:'var(--g600)',marginBottom:4}}>Select a rule to edit</div>
+          <div style={{fontSize:12,color:'var(--g400)'}}>Or click + Add Rule to create a new one</div>
+        </div>:<RuleEditor key={editing.id} rule={editing} onSave={saveRule} onDelete={deleteRule} onCancel={()=>setEditing(null)}/>}
+      </div>
+    </div>
+
+    {/* Live Tester */}
+    {showTester&&<div className="tester">
+      <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:16,flexWrap:'wrap'}}>
+        <div style={{fontSize:14,fontWeight:700,color:'var(--g900)'}}>▶ Live Rule Tester</div>
+        <select value={testCaseId} onChange={e=>{setTestCaseId(e.target.value);setTestRes(null);}} style={{padding:'6px 10px',border:'1.5px solid var(--g200)',borderRadius:7,fontSize:12,outline:'none',flex:1,maxWidth:320}}>
+          {complaints.map(c=><option key={c.id} value={c.id}>{c.id} — {c.customerName} ({c.category.split(' ')[0]})</option>)}
+        </select>
+        <button className="btn btn-navy btn-sm" onClick={runTest}>Run Test</button>
+        {testRes&&<span style={{fontSize:12,color:'var(--g500)'}}>{testRes.filter(x=>x.matched).length} rule{testRes.filter(x=>x.matched).length!==1?'s':''} would fire</span>}
+      </div>
+
+      {testRes&&<>
+        <div className="test-result-hdr"><div>Rule</div><div>Match</div><div>Conditions</div><div>Actions Applied</div></div>
+        {testRes.map(({rule,condRes,matched},i)=><div key={i} className="test-result-row" style={{background:matched?'#F0FDF4':'white'}}>
+          <div>
+            <div style={{fontWeight:600,color:'var(--g900)',fontSize:13}}>{rule.name}</div>
+            <div style={{fontSize:10.5,color:'var(--g500)',marginTop:1}}>Priority {rule.priority} · {rule.condLogic}</div>
+          </div>
+          <div>
+            <span className={`badge ${matched?'bres':'bcl'}`} style={{fontSize:12,padding:'4px 8px'}}>{matched?'✓ YES':'✕ NO'}</span>
+          </div>
+          <div style={{fontSize:11.5}}>
+            {condRes.map(({cond,matched:cm},j)=><div key={j} style={{display:'flex',alignItems:'center',gap:5,marginBottom:3}}>
+              <span style={{color:cm?'var(--emerald)':'var(--red)',fontWeight:700,fontSize:13}}>{cm?'✓':'✕'}</span>
+              <span style={{color:'var(--g700)'}}>{cond.field} {cond.op==='eq'?'=':cond.op==='neq'?'≠':'contains'} <strong>"{cond.value}"</strong></span>
+            </div>)}
+          </div>
+          <div style={{fontSize:11.5}}>
+            {matched?rule.actions.map((a,j)=><div key={j} style={{marginBottom:3}}>
+              <span className="action-chip">{a.type.replace('_',' ')}: {a.value}</span>
+            </div>):<span style={{color:'var(--g400)',fontSize:11}}>No actions (rule did not match)</span>}
+          </div>
+        </div>)}
+
+        {testRes.some(x=>x.matched)&&<div style={{marginTop:14,background:'var(--blue-tint)',borderRadius:9,padding:'12px 16px'}}>
+          <div style={{fontSize:12,fontWeight:700,color:'var(--navy)',marginBottom:8}}>After Rules Fire — Case Would Be Updated To:</div>
+          {(()=>{const c=complaints.find(x=>x.id===testCaseId);const{result}=applyRules({...c},rules.filter(r=>r.enabled));
+            return<div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10,fontSize:12}}>
+              {[['Assigned To',c.assignedTo||'Unassigned','→',result.assignedTo||'Unassigned'],['Priority',c.priority,'→',result.priority],['Status',c.status,'→',result.status]].map(([l,from,arr,to],i)=><div key={i} style={{background:'white',borderRadius:7,padding:'10px 12px'}}>
+                <div style={{fontSize:10,fontWeight:600,color:'var(--g500)',textTransform:'uppercase',marginBottom:5}}>{l}</div>
+                <div style={{display:'flex',alignItems:'center',gap:6}}>
+                  <span style={{color:from!==to?'var(--red)':'var(--g600)',textDecoration:from!==to?'line-through':'none',fontSize:11}}>{from}</span>
+                  {from!==to&&<><span style={{color:'var(--g400)'}}>→</span><span style={{color:'var(--emerald)',fontWeight:700,fontSize:11}}>{to}</span></>}
+                </div>
+              </div>);}
+            </div>;
+          })()}
+        </div>}
+      </>}
+    </div>}
+  </div>;
+}
+
+// ── RULE EDITOR ──────────────────────────────────────────────────────
+function RuleEditor({rule,onSave,onDelete,onCancel}){
+  const[name,setName]=useState(rule.name);
+  const[desc,setDesc]=useState(rule.desc||'');
+  const[conds,setConds]=useState(rule.conditions.length?rule.conditions:[{field:'category',op:'eq',value:''}]);
+  const[acts,setActs]=useState(rule.actions.length?rule.actions:[{type:'assign_to',value:''}]);
+  const[logic,setLogic]=useState(rule.condLogic||'AND');
+  const[enabled,setEnabled]=useState(rule.enabled);
+
+  const setCond=(i,k,v)=>setConds(cs=>cs.map((c,j)=>j===i?{...c,[k]:v,...(k==='field'?{value:''}:{})}:c));
+  const addCond=()=>conds.length<4&&setConds(cs=>[...cs,{field:'category',op:'eq',value:''}]);
+  const remCond=i=>setConds(cs=>cs.filter((_,j)=>j!==i));
+  const setAct=(i,k,v)=>setActs(as=>as.map((a,j)=>j===i?{...a,[k]:v,...(k==='type'?{value:''}:{})}:a));
+  const addAct=()=>acts.length<4&&setActs(as=>[...as,{type:'assign_to',value:''}]);
+  const remAct=i=>setActs(as=>as.filter((_,j)=>j!==i));
+
+  const save=()=>onSave({...rule,name,desc,conditions:conds,actions:acts,condLogic:logic,enabled});
+
+  return<div className="editor-panel">
+    <div className="editor-hdr">
+      <div style={{flex:1}}>
+        <input value={name} onChange={e=>setName(e.target.value)} style={{background:'rgba(255,255,255,.1)',border:'1px solid rgba(255,255,255,.2)',color:'white',borderRadius:6,padding:'6px 10px',fontSize:14,fontWeight:700,width:'100%',outline:'none'}} placeholder="Rule name"/>
+      </div>
+      <div style={{display:'flex',alignItems:'center',gap:8,flexShrink:0}}>
+        <span style={{color:'rgba(255,255,255,.6)',fontSize:12}}>Enabled</span>
+        <Toggle val={enabled} onChange={setEnabled}/>
+      </div>
+    </div>
+    <div className="editor-body">
+      <div className="fg" style={{marginBottom:14}}>
+        <label>Description</label>
+        <input value={desc} onChange={e=>setDesc(e.target.value)} placeholder="What does this rule do?"/>
+      </div>
+
+      <div style={{marginBottom:16}}>
+        <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:10}}>
+          <div style={{fontSize:12,fontWeight:700,color:'var(--g700)'}}>IF (Conditions)</div>
+          <div className="logic-toggle">
+            {['AND','OR'].map(l=><button key={l} className={`lt-btn ${logic===l?'active':''}`} onClick={()=>setLogic(l)}>{l}</button>)}
+          </div>
+          <span style={{fontSize:11,color:'var(--g400)'}}>{logic==='AND'?'All must match':'Any can match'}</span>
+        </div>
+        {conds.map((c,i)=>{
+          const opts=FIELD_OPTS[c.field];
+          return<div key={i} className="cond-row">
+            <select value={c.field} onChange={e=>setCond(i,'field',e.target.value)} style={{flex:'0 0 140px'}}>{COND_FIELDS.map(f=><option key={f.v} value={f.v}>{f.l}</option>)}</select>
+            <select value={c.op} onChange={e=>setCond(i,'op',e.target.value)} className="operator" style={{flex:'0 0 90px'}}>
+              <option value="eq">equals</option><option value="neq">not equals</option><option value="contains">contains</option>
+            </select>
+            {opts?<select value={c.value} onChange={e=>setCond(i,'value',e.target.value)} style={{flex:1}}><option value="">— value —</option>{opts.map(o=><option key={o}>{o}</option>)}</select>
+              :<input value={c.value} onChange={e=>setCond(i,'value',e.target.value)} placeholder="Value…" style={{flex:1}}/>}
+            <button className="remove-btn" onClick={()=>remCond(i)} title="Remove">✕</button>
+          </div>;
+        })}
+        {conds.length<4&&<button className="btn btn-ghost btn-xs" onClick={addCond} style={{marginTop:4}}>+ Add Condition</button>}
+      </div>
+
+      <div style={{marginBottom:16}}>
+        <div style={{fontSize:12,fontWeight:700,color:'var(--g700)',marginBottom:10}}>THEN (Actions)</div>
+        {acts.map((a,i)=>{
+          const aOpts=ACT_OPTS[a.type];
+          return<div key={i} className="action-row">
+            <select value={a.type} onChange={e=>setAct(i,'type',e.target.value)} style={{flex:'0 0 140px'}}>{ACT_TYPES.map(t=><option key={t.v} value={t.v}>{t.l}</option>)}</select>
+            {aOpts?<select value={a.value} onChange={e=>setAct(i,'value',e.target.value)} style={{flex:1}}><option value="">— value —</option>{aOpts.map(o=><option key={o}>{o}</option>)}</select>
+              :<input value={a.value} onChange={e=>setAct(i,'value',e.target.value)} placeholder="Enter value…" style={{flex:1}}/>}
+            <button className="remove-btn" onClick={()=>remAct(i)}>✕</button>
+          </div>;
+        })}
+        {acts.length<4&&<button className="btn btn-ghost btn-xs" onClick={addAct} style={{marginTop:4}}>+ Add Action</button>}
+      </div>
+
+      <div className="divider"/>
+      <div style={{display:'flex',gap:8}}>
+        <button className="btn btn-navy btn-sm" onClick={save}>Save Rule</button>
+        <button className="btn btn-sec btn-sm" onClick={onCancel}>Cancel</button>
+        <button className="btn btn-red btn-sm" style={{marginLeft:'auto'}} onClick={()=>onDelete(rule.id)}>Delete Rule</button>
+      </div>
+    </div>
+  </div>;
+}
+
+// ── APP ──────────────────────────────────────────────────────────────
+function App(){
+  const[view,setView]=useState('dashboard');
+  const[role,setRole]=useState('compliance');
+  const[complaints,setComplaints]=useState(SEED);
+  const[rules,setRules]=useState(DEFAULT_RULES);
+  const[selected,setSelected]=useState(null);
+  const[toast,setToast]=useState(null);
+  const[showRole,setShowRole]=useState(false);
+  const showToast=msg=>setToast(msg);
+
+  const addComplaint=(c,fired)=>{
+    setComplaints(p=>[c,...p]);
+    const msg=fired?.length?`✅ ${c.id} created · ⚡ ${fired.length} rule${fired.length>1?'s':''} fired: ${fired.map(r=>r.name).join(', ')}`:`✅ Case ${c.id} created`;
+    showToast(msg);setView('dashboard');
+  };
+  const updateCase=(id,ch)=>setComplaints(p=>p.map(c=>c.id===id?{...c,...ch}:c));
+  const perms=ROLES_CFG[role].perms;
+  const breachN=complaints.filter(c=>getSLA(c).s==='breach'&&c.status!=='Resolved'&&c.status!=='Closed').length;
+  const auditTotal=complaints.flatMap(c=>c.auditTrail).length;
+
+  const NAV=[
+    {sec:'Operations',items:[
+      {id:'dashboard',icon:'📋',label:'Case Dashboard',badge:breachN>0?breachN:null,bcls:'nb-red'},
+      {id:'intake',icon:'✏️',label:'New Complaint'},
+      {id:'classifier',icon:'🤖',label:'AI Classifier'},
+    ]},
+    {sec:'Compliance',items:[
+      {id:'cfpb',icon:'📊',label:'CFPB Reports',locked:!perms['CFPB Export']},
+      {id:'audit',icon:'🔍',label:'Audit Log',badge:auditTotal,bcls:'nb-gray',locked:!perms['Audit Log']},
+      {id:'analytics',icon:'📈',label:'Analytics',locked:!perms['Analytics']},
+    ]},
+    {sec:'Automation',items:[
+      {id:'workflow',icon:'⚙️',label:'Workflow Builder',badge:rules.filter(r=>r.enabled).length,bcls:'nb-amber',locked:!perms['Workflow Builder']},
+    ]},
+  ];
+  const TITLES={dashboard:'Case Dashboard',intake:'New Complaint Intake',classifier:'AI Classification Engine',cfpb:'CFPB Regulatory Report',audit:'Immutable Audit Log',analytics:'Analytics Dashboard',workflow:'Workflow &amp; Routing Builder'};
+
+  const jumpToCase=caseId=>{const c=complaints.find(x=>x.id===caseId);if(c){setSelected(c);setView('dashboard');}};
+
+  return<div className="app">
+    <div className="sb">
+      <div className="sb-logo">
+        <div className="logo-row"><div className="logo-badge">1FFC</div><div className="logo-name">ComplaintPortal</div></div>
+        <div className="logo-sub">Complaint Management · v3.0</div>
+      </div>
+      <div className="sb-nav">
+        {NAV.map(({sec,items})=><React.Fragment key={sec}>
+          <div className="nav-sec">{sec}</div>
+          {items.map(item=><button key={item.id} className={`nav-item ${view===item.id?'active':''} ${item.locked?'locked':''}`}
+            onClick={()=>!item.locked&&setView(item.id)} title={item.locked?`Requires elevated role`:''}>
+            <span className="nav-icon">{item.icon}</span>
+            {item.label}
+            {item.locked&&<span style={{marginLeft:'auto',fontSize:11}}>🔒</span>}
+            {!item.locked&&item.badge!=null&&item.badge>0&&<span className={`nav-badge ${item.bcls||'nb-gray'}`}>{item.badge}</span>}
+          </button>)}
+        </React.Fragment>)}
+      </div>
+      <div className="sb-foot">
+        <div className="user-pill">
+          <div className="avatar">{role==='agent'?'BA':role==='compliance'?'CO':'SA'}</div>
+          <div><div className="u-name">Ellen Hart</div><div className="u-role">{ROLES_CFG[role].label}</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div className="main">
+      <div className="topbar">
+        <div className="topbar-title" dangerouslySetInnerHTML={{__html:TITLES[view]}}/>
+        <div className="topbar-actions">
+          <div style={{display:'flex',alignItems:'center',gap:5,padding:'4px 10px',background:'var(--emerald-bg)',borderRadius:20,fontSize:11,fontWeight:700,color:'var(--emerald-dk)'}}>
+            <span style={{width:6,height:6,borderRadius:'50%',background:'var(--emerald)',display:'inline-block'}}/>AI Online
+          </div>
+          <div style={{display:'flex',alignItems:'center',gap:5,padding:'4px 10px',background:'var(--blue-tint)',borderRadius:20,fontSize:11,fontWeight:700,color:'var(--navy)'}}>
+            ⚡ {rules.filter(r=>r.enabled).length} Rules Active
+          </div>
+          <RolePill role={role} onClick={()=>setShowRole(true)}/>
+        </div>
+      </div>
+      <div className="content">
+        {view==='dashboard' &&<DashboardScreen complaints={complaints} role={role} onSelect={setSelected} onNew={()=>setView('intake')}/>}
+        {view==='intake'    &&<IntakeScreen complaints={complaints} rules={rules} onSubmit={addComplaint}/>}
+        {view==='classifier'&&<ClassifierScreen/>}
+        {view==='cfpb'      &&<CFPBScreen complaints={complaints} role={role}/>}
+        {view==='audit'     &&<AuditScreen complaints={complaints} role={role} onSelectCase={jumpToCase}/>}
+        {view==='analytics' &&<AnalyticsScreen complaints={complaints} role={role}/>}
+        {view==='workflow'  &&<WorkflowScreen rules={rules} onUpdate={setRules} complaints={complaints} role={role} showToast={showToast}/>}
+      </div>
+    </div>
+
+    {selected&&<CaseDrawer complaint={selected} role={role} onClose={()=>setSelected(null)}
+      onUpdate={(id,ch)=>{updateCase(id,ch);setSelected(p=>({...p,...ch}));}} showToast={showToast}/>}
+    {showRole&&<RoleModal role={role} onSelect={setRole} onClose={()=>setShowRole(false)}/>}
+    <Toast msg={toast} onDone={()=>setToast(null)}/>
+  </div>;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  React.createElement(React.StrictMode,null,React.createElement(App))
+);
+</script>
+</body>
+</html>
